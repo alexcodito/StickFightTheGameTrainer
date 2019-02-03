@@ -80,8 +80,8 @@
             // 
             // radRichTextEditorErrorLog
             // 
-            this.radRichTextEditorErrorLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.radRichTextEditorErrorLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radRichTextEditorErrorLog.BackColor = System.Drawing.Color.White;
             this.radRichTextEditorErrorLog.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -95,6 +95,7 @@
             // 
             // btnDecLog
             // 
+            this.btnDecLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnDecLog.Location = new System.Drawing.Point(128, 415);
             this.btnDecLog.Name = "btnDecLog";
             this.btnDecLog.Size = new System.Drawing.Size(63, 24);
@@ -115,6 +116,7 @@
             this.Controls.Add(this.linkLabelModdb);
             this.Controls.Add(this.labelDisclaimer);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(554, 489);
             this.Name = "ErrorReportingForm";
             this.Text = "Error report";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ErrorReportingForm_FormClosing);
