@@ -1,4 +1,4 @@
-# StickFightTheGameTrainer
+# Stick Fight: The Game Trainer
 A trainer / mod for Stick Fight: The Game that supports both local and online multiplayer modes (via steam).
 
 Injecting IL code directly into the game's Assembly-CSharp.dll file allows this trainer to work accross all versions, including future updates. The intention is to have a maintenance-free trainer that does not need to reflect changes that are made in every update to the game. 
