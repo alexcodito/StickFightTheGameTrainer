@@ -28,12 +28,11 @@ namespace StickFightTheGameTrainer
             _logger = logger;
             _patcher = patcher;
             _errorReportingForm = errorReportingForm;
-            _errorReportingForm.Show();
 
             if (File.Exists(GameDirectories.CommonPath))
             {
-                browseGamePathDialog.SelectedPath = Path.GetDirectoryName(GameDirectories.CommonPath);
                 txtGamePath.Text = GameDirectories.CommonPath;
+                browseGamePathDialog.SelectedPath = Path.GetDirectoryName(txtGamePath.Text);
                 btnInstallMod.Enabled = true;
             }
 
@@ -78,6 +77,8 @@ namespace StickFightTheGameTrainer
 
         private async void BtnBrowseGamePath_Click(object sender, EventArgs e)
         {
+            browseGamePathDialog.SelectedPath = Path.GetDirectoryName(txtGamePath.Text);
+
             var dialogResult = browseGamePathDialog.ShowDialog();
 
             if (dialogResult == DialogResult.OK)
