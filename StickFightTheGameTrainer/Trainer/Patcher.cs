@@ -135,7 +135,7 @@ namespace StickFightTheGameTrainer.Trainer
                     return await Task.FromResult(false);
                 }
             }
-            
+
             var directory = Path.GetDirectoryName(path);
 
             if (directory == null)
@@ -170,7 +170,7 @@ namespace StickFightTheGameTrainer.Trainer
             }
 
             var targetGameVersion = $"{await GetGameVersion()}";
-            
+
             var matches = Directory.GetFiles(directory, $"Assembly-CSharp_{targetGameVersion}*_backup.dll");
 
             if (!matches.Any())
@@ -523,7 +523,7 @@ namespace StickFightTheGameTrainer.Trainer
             }
 
             // Decrypt and load sources for the Trainer Logic Module
-            var moduleSources = _trainerLogicModuleBuilder.DecryptAndLoadLogicModuleSource(TrainerLogicModule.ModuleDataPrivatesDictionary["Key"], TrainerLogicModule.ModuleDataPrivatesDictionary["Iv"]);
+            var moduleSources = _trainerLogicModuleBuilder.DecryptAndLoadLogicModuleSource(TrainerLogicModule.ModuleDataPrivatesDictionary["Key"], TrainerLogicModule.ModuleDataPrivatesDictionary["Iv"], await GetGameVersion());
 
             // Compile from sources
             CompilerResults results = codeProvider.CompileAssemblyFromSource(parameters, moduleSources.ToArray());

@@ -10,7 +10,7 @@ public class TrainerManager : MonoBehaviour
 {
     public void OnGUI()
     {
-        if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOGameManagerptions>.Instance.CheatsEnabled)
+        if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             string msFps;
             if (Singleton<TrainerOptions>.Instance.DisplayFps)
@@ -32,7 +32,7 @@ public class TrainerManager : MonoBehaviour
                 Singleton<TrainerOptions>.Instance.DisplayFps = !Singleton<TrainerOptions>.Instance.DisplayFps;
             }
 
-            GUI.Label(new Rect(35f, 50f, 425f, 25f), "<color=silver><b>+11 Trainer v1.0.0.0 - Made by loxa</b></color>");
+            GUI.Label(new Rect(35f, 50f, 425f, 25f), "<color=silver><b>+11 Trainer v{Application.ProductVersion} - Made by loxa</b></color>");
             GUI.Label(new Rect(35f, 80f, 400f, 90f), "<color=grey><b>Toggle Options </b></color>");
 
             if (GUI.Toggle(new Rect(35f, 100f, 100f, 25f), Singleton<TrainerOptions>.Instance.TrainerActive, (!Singleton<TrainerOptions>.Instance.TrainerActive) ? "<color=green> Online Mode</color>" : "<color=green> Friends Mode</color>") != Singleton<TrainerOptions>.Instance.TrainerActive)
@@ -190,7 +190,11 @@ public class TrainerManager : MonoBehaviour
         }
         if (MatchmakingHandler.IsNetworkMatch)
         {
-            GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
+            // TODO: Uncomment one of the two:
+            // Pre v1.2.08
+            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
+            // Post v1.2.08
+            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, true);
             return;
         }
 

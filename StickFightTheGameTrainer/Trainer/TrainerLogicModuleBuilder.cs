@@ -17,16 +17,19 @@ namespace StickFightTheGameTrainer.Trainer
             _logger = logger;
         }
 
-        public List<string> DecryptAndLoadLogicModuleSource(string key, string iv)
+        public List<string> DecryptAndLoadLogicModuleSource(string key, string iv, string version)
         {
-            List<string> decryptedModuleData = new List<string>();
+            List<string> decryptedModules = new List<string>();
 
             foreach (var encryptedModuleData in TrainerLogicModule.EncryptedModuleDataDictionary)
             {
-                decryptedModuleData.Add(AesUtility.DecryptStringFromBase64String(encryptedModuleData.Value, key, iv));
+                var decryptedModule = AesUtility.DecryptStringFromBase64String(encryptedModuleData.Value, key, iv);
+                decryptedModule = ProcessModuleSource(decryptedModule, version);
+
+                decryptedModules.Add(decryptedModule);
             }
 
-            return decryptedModuleData;
+            return decryptedModules;
         }
 
         public async Task EncryptLogicModuleSource()
@@ -44,7 +47,7 @@ namespace StickFightTheGameTrainer.Trainer
             using (var aesAlgo = new AesCryptoServiceProvider())
             {
                 aesAlgo.Padding = PaddingMode.PKCS7;
-                
+
                 foreach (var filename in targetFileNames)
                 {
                     var filePath = Path.Combine(path, filename + ".cs");
@@ -79,6 +82,26 @@ namespace StickFightTheGameTrainer.Trainer
                 File.WriteAllText(Path.Combine(path, "key.data"), Convert.ToBase64String(aesAlgo.Key));
                 File.WriteAllText(Path.Combine(path, "iv.data"), Convert.ToBase64String(aesAlgo.IV));
             }
+        }
+
+        private static string ProcessModuleSource(string decryptedModule, string version)
+        {
+            // Replace trainer version string
+            decryptedModule = decryptedModule.Replace("{Application.ProductVersion}", System.Windows.Forms.Application.ProductVersion);
+
+            var versionParsed = double.TryParse(version, out var dVersion);
+
+            // SpawnRandomWeapon takes 3 arguments since version 1.2.08 (1.8) 
+            if (versionParsed && dVersion < 1.8)
+            {
+                decryptedModule = decryptedModule.Replace("//{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}", "");
+            }
+            else
+            {
+                decryptedModule = decryptedModule.Replace("//{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}", "");
+            }
+
+            return decryptedModule;
         }
     }
 }

@@ -9,7 +9,7 @@ public class TrainerOptions : Singleton<TrainerOptions>
         {
             return currentVersion;
         }
-        return currentVersion + "[loxa_V1.0.0.0]";
+        return currentVersion + "[loxa_V{Application.ProductVersion}]";
     }
 
     public void Awake()
