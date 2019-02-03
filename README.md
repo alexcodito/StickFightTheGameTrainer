@@ -47,7 +47,11 @@ Run the program and specify the path to your Stick Fight The Game installation f
 
 ### Release Information
 
-##### Version 1.0.0.0 (for all versions of the game) - *Included*
+##### Version 1.0.0.1 (for all versions of the game)
+- Added support for newer versions of the game (no regression in compatibility).
+- Minor bug fixes and improvements.
+
+##### Version 1.0.0.0 (for all versions of the game)
 - Automated installer for all versions of the game.
 - Bugfixes.
 
