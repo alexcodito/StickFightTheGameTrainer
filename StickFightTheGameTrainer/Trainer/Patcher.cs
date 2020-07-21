@@ -175,17 +175,20 @@ namespace StickFightTheGameTrainer.Trainer
 
             if (!matches.Any())
             {
+                await _logger.Log("Could not locate any backups.");
                 return await Task.FromResult(false);
             }
 
             var firstMatchPath = matches.OrderByDescending(s => s).First();
-
             var destinationPath = Path.GetDirectoryName(firstMatchPath);
 
             if (destinationPath == null)
             {
+                await _logger.Log("The destination path for backup restoration is invalid.");
                 return await Task.FromResult(false);
             }
+
+            await _logger.Log($"Restoring latest backup: {Path.GetFileName(firstMatchPath)}");
 
             _targetModule?.Dispose();
 
