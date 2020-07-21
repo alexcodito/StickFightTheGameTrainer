@@ -45,11 +45,10 @@ public class TrainerManager : MonoBehaviour
                 Singleton<TrainerOptions>.Instance.TrainerActive = !Singleton<TrainerOptions>.Instance.TrainerActive;
 
                 StartCoroutine(Wait(2f));
-                // StartCoroutine(this.ExecuteAfterTime(2f, delegate
-                // {
+
+
                 MultiplayerManager.mGameManager.RestartGame();
                 MatchmakingHandler.SetNewLobbyType(ELobbyType.k_ELobbyTypePrivate);
-                // }));
             }
 
             if (GUI.Toggle(new Rect(35f, 120f, 100f, 25f), Singleton<TrainerOptions>.Instance.DisplayHealthBars, " Health Bars") != Singleton<TrainerOptions>.Instance.DisplayHealthBars)
@@ -107,16 +106,24 @@ public class TrainerManager : MonoBehaviour
         {
             foreach (Controller controller2 in MultiplayerManager.mGameManager.controllerHandler.players)
             {
-                if (Singleton<TrainerOptions>.Instance.DisplayHealthBars)
+                if (controller2.fighting != null)
                 {
-                    float health = controller2.fighting.GetComponent<HealthHandler>().health;
-                    EditorGUITools.DrawRect(new Rect(Screen.width - 125, 30f * controller2.playerID + 10f, Math.Max(0f, health), 20f), GetPlayerColorByIndex(controller2.playerID), null);
-                    GUI.Label(new Rect(Screen.width - 160, 30f * controller2.playerID + 10f, 250f, 25f), Math.Max(0.0, Math.Round(health)).ToString());
-                }
+                    if (Singleton<TrainerOptions>.Instance.DisplayHealthBars)
+                    {
+                        float health = 0f;
+                        var healthHandler = controller2.fighting.GetComponent<HealthHandler>();
+                        if (healthHandler != null)
+                        {
+                            health = controller2.fighting.GetComponent<HealthHandler>().health;
+                        }
+                        EditorGUITools.DrawRect(new Rect(Screen.width - 125, 30f * controller2.playerID + 10f, Math.Max(0f, health), 20f), GetPlayerColorByIndex(controller2.playerID), null);
+                        GUI.Label(new Rect(Screen.width - 160, 30f * controller2.playerID + 10f, 250f, 25f), Math.Max(0.0, Math.Round(health)).ToString());
+                    }
 
-                if (Singleton<TrainerOptions>.Instance.DisplayScore)
-                {
-                    GUI.Label(new Rect(Screen.width - 180, 30f * (float)controller2.playerID + 10f, 250f, 25f), "<b>" + controller2.fighting.stats.wins.ToString() + "</b>");
+                    if (Singleton<TrainerOptions>.Instance.DisplayScore && controller2.fighting.stats != null)
+                    {
+                        GUI.Label(new Rect(Screen.width - 180, 30f * (float)controller2.playerID + 10f, 250f, 25f), "<b>" + controller2.fighting.stats.wins.ToString() + "</b>");
+                    }
                 }
             }
         }
@@ -126,19 +133,6 @@ public class TrainerManager : MonoBehaviour
     {
         yield return new WaitForSeconds(waitTime);
     }
-
-    // public IEnumerator ExecuteAfterTime(float time, Action task)
-    // {
-    // if (this.isCoroutineExecuting)
-    // {
-    // yield break;
-    // }
-    // this.isCoroutineExecuting = true;
-    // yield return new WaitForSeconds(time);
-    // task();
-    // this.isCoroutineExecuting = false;
-    // yield break;
-    // }
 
     private bool CheckCheatsEnabled()
     {
@@ -207,16 +201,6 @@ public class TrainerManager : MonoBehaviour
         deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
         if (Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
-            //if (Singleton<TrainerOptions>.Instance.FlightMode)
-            //{
-            //    foreach (Controller controller in MultiplayerManager.mGameManager.controllerHandler.players)
-            //    {
-            //        if (controller != null)
-            //        {
-            //            controller.canFly = true;
-            //        }
-            //    }
-            //}
             if ((Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKeyUp(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.S)))
             {
                 Singleton<TrainerOptions>.Instance.NoWinners = true;
@@ -251,9 +235,18 @@ public class TrainerManager : MonoBehaviour
                             int trainerWeaponIndex = controller.fighting.TrainerWeaponIndex;
                             controller.fighting.TrainerWeaponIndex = trainerWeaponIndex - 1;
                         }
+
                         controller.fighting.Dissarm();
                         controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
-                        controller.fighting.mNetworkPlayer.mChatManager.Talk(controller.fighting.weapon.name);
+
+                        // Add a closed parenthesis after the weapon number.
+                        var weaponName = controller.fighting.weapon.name;
+                        if (weaponName != null && weaponName.IndexOf(" ") > -1)
+                        {
+                            weaponName = weaponName.Insert(weaponName.IndexOf(" "), ".");
+                        }
+
+                        controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
                     }
                     if (controller.mPlayerActions.activeDevice.DPadRight.WasReleased || (Input.GetKeyUp(KeyCode.E) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)))
                     {
@@ -266,32 +259,54 @@ public class TrainerManager : MonoBehaviour
                             int trainerWeaponIndex2 = controller.fighting.TrainerWeaponIndex;
                             controller.fighting.TrainerWeaponIndex = trainerWeaponIndex2 + 1;
                         }
+
                         controller.fighting.Dissarm();
                         controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
-                        controller.fighting.mNetworkPlayer.mChatManager.Talk(controller.fighting.weapon.name);
+
+                        // Add a closed parenthesis after the weapon number.
+                        var weaponName = controller.fighting.weapon.name;
+                        if (weaponName != null && weaponName.IndexOf(" ") > -1)
+                        {
+                            weaponName = weaponName.Insert(weaponName.IndexOf(" "), ".");
+                        }
+
+                        controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
                     }
                     if (Singleton<TrainerOptions>.Instance.UncappedFirerate)
                     {
-                        controller.fighting.weapon.cd = 0f;
-                        controller.fighting.weapon.reloads = false;
-                        controller.fighting.weapon.reloadTime = 0f;
-                        controller.fighting.weapon.shotsBeforeReload = 9999;
+                        if (controller.fighting.weapon != null)
+                        {
+                            controller.fighting.weapon.cd = 0f;
+                            controller.fighting.weapon.reloads = false;
+                            controller.fighting.weapon.reloadTime = 0f;
+                            controller.fighting.weapon.shotsBeforeReload = 9999;
+                        }
                     }
                     if (Singleton<TrainerOptions>.Instance.FullAuto)
                     {
-                        controller.fighting.weapon.fullAuto = true;
-                        controller.fighting.fullAuto = true;
+                        if (controller.fighting.weapon != null)
+                        {
+                            controller.fighting.weapon.fullAuto = true;
+                            controller.fighting.fullAuto = true;
+                        }
                     }
                     if (Singleton<TrainerOptions>.Instance.UnlimitedAmmo)
                     {
-                        controller.fighting.weapon.currentCharge = 9999f;
-                        controller.fighting.weapon.secondsOfUseLeft = 9999f;
+                        if (controller.fighting.weapon != null)
+                        {
+                            controller.fighting.weapon.currentCharge = 9999f;
+                            controller.fighting.weapon.secondsOfUseLeft = 9999f;
+                        }
+
                         controller.fighting.bulletsLeft = 9999;
                     }
                     if (Singleton<TrainerOptions>.Instance.NoRecoil)
                     {
-                        controller.fighting.weapon.recoil = 0f;
-                        controller.fighting.weapon.torsoRecoil = 0f;
+                        if (controller.fighting.weapon != null)
+                        {
+                            controller.fighting.weapon.recoil = 0f;
+                            controller.fighting.weapon.torsoRecoil = 0f;
+                        }
                     }
                 }
             }
@@ -317,20 +332,25 @@ public class TrainerManager : MonoBehaviour
     {
         private static readonly Texture2D backgroundTexture = Texture2D.whiteTexture;
 
-        public static void DrawRect(Rect position, Color color, GUIContent content)
+        public static void DrawRect(Rect position, Color color, GUIContent guiContent)
         {
-            Color backgroundColor = GUI.backgroundColor;
+            var backgroundColor = GUI.backgroundColor;
             GUI.backgroundColor = color;
-            GUIContent cont = content;
-            if (cont == null)
+
+            var content = guiContent;
+            
+            if (content == null)
             {
-                cont = GUIContent.none;
+                content = GUIContent.none;
             }
-            GUIStyleState gUIStyleState = new GUIStyleState();
-            GUIStyle style = new GUIStyle();
+
+            var gUIStyleState = new GUIStyleState();
+            var style = new GUIStyle();
+
             style.normal = gUIStyleState;
             style.normal.background = backgroundTexture;
-            GUI.Box(position, cont, style);
+
+            GUI.Box(position, content, style);
             GUI.backgroundColor = backgroundColor;
         }
     }
