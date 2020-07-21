@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using StickFightTheGameTrainer.Trainer.TrainerLogic;
 
@@ -47,6 +48,18 @@ namespace StickFightTheGameTrainer.Trainer
             using (var aesAlgo = new AesCryptoServiceProvider())
             {
                 aesAlgo.Padding = PaddingMode.PKCS7;
+                aesAlgo.KeySize = 256;
+
+                var key = Convert.ToBase64String(aesAlgo.Key);
+                var iv = Convert.ToBase64String(aesAlgo.IV);
+
+                File.WriteAllText(Path.Combine(path, "key.data"), key);
+                File.WriteAllText(Path.Combine(path, "iv.data"), iv);
+
+                var encryptedData = new StringBuilder();
+
+                encryptedData.AppendLine($"{{ \"Iv\", \"{iv}\" }},");
+                encryptedData.AppendLine($"{{ \"Key\", \"{key}\" }},{Environment.NewLine}");
 
                 foreach (var filename in targetFileNames)
                 {
@@ -73,14 +86,15 @@ namespace StickFightTheGameTrainer.Trainer
                         return;
                     }
 
-                    var encrypted = Convert.ToBase64String(encryptedBytes);
-                    File.WriteAllText(filePath.Replace(".cs", ".data"), encrypted);
+                    var base64EncryptedData = Convert.ToBase64String(encryptedBytes);
+                    File.WriteAllText(filePath.Replace(".cs", ".data"), base64EncryptedData);
 
                     await _logger.Log($"File '{filename}' has been successfully encrypted and saved.");
+
+                    encryptedData.AppendLine($"{{ \"{filename}\", \"{base64EncryptedData}\" }},");
                 }
 
-                File.WriteAllText(Path.Combine(path, "key.data"), Convert.ToBase64String(aesAlgo.Key));
-                File.WriteAllText(Path.Combine(path, "iv.data"), Convert.ToBase64String(aesAlgo.IV));
+                await _logger.Log(encryptedData.ToString());
             }
         }
 
@@ -91,7 +105,9 @@ namespace StickFightTheGameTrainer.Trainer
 
             var versionParsed = double.TryParse(version, out var dVersion);
 
-            // SpawnRandomWeapon takes 3 arguments since version 1.2.08 (1.8) 
+            // Uncomment matching lines of code depending on the parsed target game version.
+
+            // SpawnRandomWeapon method takes 3 arguments since version 1.2.08 (1.8) 
             if (versionParsed && dVersion < 1.8)
             {
                 decryptedModule = decryptedModule.Replace("//{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}", "");
