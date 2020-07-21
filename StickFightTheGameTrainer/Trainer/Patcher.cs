@@ -16,16 +16,14 @@ namespace StickFightTheGameTrainer.Trainer
 {
     public sealed class Patcher
     {
+        private ModuleDefMD _logicModule;
+        private ModuleDefMD _targetModule;
+        private string _targetModulePath;
         private readonly InjectionHelpers _injectionHelpers;
         private readonly Common.ILogger _logger;
         private readonly TrainerLogicModuleBuilder _trainerLogicModuleBuilder;
 
-        private ModuleDefMD _logicModule;
-        private ModuleDefMD _targetModule;
-
-        private string _targetModulePath;
-
-        // These particular fields are required for TrainerManager to be able to access them.
+        // Private game fields that are accessed by TrainerManager.
         private readonly List<KeyValuePair<string, string>> _targetFields = new List<KeyValuePair<string, string>>
         {
             new KeyValuePair<string, string>("MultiplayerManager", "mGameManager"),
@@ -46,7 +44,7 @@ namespace StickFightTheGameTrainer.Trainer
             new KeyValuePair<string, string>("CharacterActions", "mInputType")
         };
 
-        // These particular methods are required for TrainerManager to be able to access them.
+        // Private game methods that are accessed by TrainerManager.
         private readonly List<KeyValuePair<string, string>> _targetMethods = new List<KeyValuePair<string, string>>
         {
             new KeyValuePair<string, string>("GameManager", "AllButOnePlayersDied"),
