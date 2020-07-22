@@ -494,8 +494,9 @@ namespace StickFightTheGameTrainer.Trainer
 
             var parameters = new CompilerParameters
             {
-                //GenerateExecutable = false,
-                //GenerateInMemory = true,
+#if DEBUG
+                CompilerOptions = "/d:DEBUG",
+#endif
 
                 IncludeDebugInformation = false,
                 OutputAssembly = trainerLogicDllPath
