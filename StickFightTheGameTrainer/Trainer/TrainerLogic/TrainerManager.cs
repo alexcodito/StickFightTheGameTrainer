@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Text;
 using Steamworks;
 using UnityEngine;
 
@@ -9,6 +10,11 @@ public class TrainerManager : MonoBehaviour
     public float deltaTime;
     public bool isCoroutineExecuting;
     public ControllerHandler controllerHandler;
+
+#if DEBUG
+    private Vector2 _unityLogsScrollPosition = Vector2.zero;
+    private readonly StringBuilder _unityLogs = new StringBuilder();
+#endif
 
     public TrainerManager()
     {
@@ -19,6 +25,10 @@ public class TrainerManager : MonoBehaviour
     {
         // Initialize objects on Unity's Start method instead of the constructor.
         controllerHandler = GetComponent<ControllerHandler>();
+
+#if DEBUG
+        Application.logMessageReceived += HandleUnityLogs;
+#endif
     }
 
     /// <summary>
@@ -189,6 +199,10 @@ public class TrainerManager : MonoBehaviour
 
     public void OnGUI()
     {
+#if DEBUG
+        DisplayLogs(450f, 25f, 410f, 330f);
+#endif
+
         if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             // Draw menu container and title
@@ -477,6 +491,46 @@ public class TrainerManager : MonoBehaviour
                 return Color.white;
         }
     }
+
+#if DEBUG
+    private void DisplayLogs(float x, float y, float width, float height)
+    {
+        GUI.Box(new Rect(x, y, width, height), "");
+        if (GUI.Button(new Rect(x + width - 50f, y + height + 10f, 50f, 30f), "Clear"))
+        {
+            _unityLogs.Length = 0;
+        }
+        GUILayout.BeginArea(new Rect(x, y, width, height));
+        _unityLogsScrollPosition = GUILayout.BeginScrollView(_unityLogsScrollPosition, new GUILayoutOption[]
+        {
+            GUILayout.Width(width),
+            GUILayout.Height(height)
+        });
+        GUILayout.TextField(_unityLogs.ToString(), "Label", new GUILayoutOption[0]);
+        GUILayout.EndScrollView();
+        GUILayout.EndArea();
+    }
+
+    private void HandleUnityLogs(string logString, string stackTrace, LogType type)
+    {
+        if (_unityLogs.Length > 20000)
+        {
+            _unityLogs.Remove(0, _unityLogs.Length);
+        }
+
+        if (logString.Length > 1000)
+        {
+            logString = logString.Substring(0, 1000);
+        }
+
+        if (stackTrace.Length > 1000)
+        {
+            stackTrace = stackTrace.Substring(0, 1000);
+        }
+
+        _unityLogs.AppendLine(type.ToString() + ": " + logString + Environment.NewLine + stackTrace);
+    }
+#endif
 
     // GUI utility polyfill
     public static class EditorGUITools
