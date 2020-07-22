@@ -12,15 +12,49 @@ namespace StickFightTheGameTrainer.Trainer
     public class TrainerLogicModuleBuilder
     {
         private readonly ILogger _logger;
+        private readonly List<string> _targetSourceCodeFileNames;
 
         public TrainerLogicModuleBuilder(ILogger logger)
         {
             _logger = logger;
+            _targetSourceCodeFileNames = new List<string> { "Singleton", "TrainerManager", "TrainerOptions" };
         }
 
         public List<string> DecryptAndLoadLogicModuleSource(string key, string iv, string version)
         {
             List<string> decryptedModules = new List<string>();
+
+#if DEBUG
+            // Load source files without dealing with decryption.
+
+            var path = Path.Combine(Environment.CurrentDirectory, "..", "..", "Trainer\\TrainerLogic");
+
+            if (!Directory.Exists(path))
+            {
+                throw new Exception("Path does not exist: " + path);
+            }
+
+            foreach (var filename in _targetSourceCodeFileNames)
+            {
+                var filePath = Path.Combine(path, filename + ".cs");
+                if (!File.Exists(filePath))
+                {
+                    throw new Exception("File could not be located: " + filePath);
+                }
+
+                var contents = File.ReadAllText(filePath);
+
+                if (string.IsNullOrWhiteSpace(contents))
+                {
+                    throw new Exception($"File does not contain any data: '{filename}'");
+                }
+
+                decryptedModules.Add(contents);
+            }
+#endif
+
+#if !DEBUG
+            // Decrypt each encrypted source code file.
 
             foreach (var encryptedModuleData in TrainerLogicModule.EncryptedModuleDataDictionary)
             {
@@ -29,6 +63,7 @@ namespace StickFightTheGameTrainer.Trainer
 
                 decryptedModules.Add(decryptedModule);
             }
+#endif
 
             return decryptedModules;
         }
@@ -42,8 +77,6 @@ namespace StickFightTheGameTrainer.Trainer
                 await _logger.Log("Path does not exist: " + path, LogLevel.Error);
                 return;
             }
-
-            var targetFileNames = new List<string> { "Singleton", "TrainerManager", "TrainerOptions" };
 
             using (var aesAlgo = new AesCryptoServiceProvider())
             {
@@ -61,7 +94,7 @@ namespace StickFightTheGameTrainer.Trainer
                 encryptedData.AppendLine($"{{ \"Iv\", \"{iv}\" }},");
                 encryptedData.AppendLine($"{{ \"Key\", \"{key}\" }},{Environment.NewLine}");
 
-                foreach (var filename in targetFileNames)
+                foreach (var filename in _targetSourceCodeFileNames)
                 {
                     var filePath = Path.Combine(path, filename + ".cs");
                     if (!File.Exists(filePath))
