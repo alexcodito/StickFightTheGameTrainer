@@ -159,13 +159,13 @@ public class TrainerManager : MonoBehaviour
             GUI.Label(new Rect(35f, 180f, 400f, 90f), "<color=grey><b>PC Keyboard Shortcuts</b></color>\r\n" +
                                                       "- Toggle Menu:\t[SHIFT] + [M]\r\n" +
                                                       "- Skip Map:\t[SHIFT] + [S]\r\n" +
-                                                      "- Spawn Weapon:\t[R]\r\n-" +
-                                                      " Browse Weapons:\t[Q] for previous or [E] for next");
+                                                      "- Spawn Weapon:\t[R] or [P]\r\n" +
+                                                      "- Browse Weapons:\t[Q] for previous or [E] for next");
 
             GUI.Label(new Rect(35f, 270f, 500f, 90f), "<color=grey><b>Xbox 360 Controller Shortcuts</b></color>\r\n" +
-                                                      "- Toggle Menu:\t[Left Trigger Button] + [Right Trigger Button]\r\n" +
+                                                      "- Toggle Menu:\t[LT Button] + [RT Button]\r\n" +
                                                       "- Skip Map:\t[RB] + [B]\r\n" +
-                                                      "- Spawn Weapon:\t[DPadUp]\r\n" +
+                                                      "- Spawn Weapon:\t[DPadUp] or [DPadDown]\r\n" +
                                                       "- Browse Weapons:\t[DPadLeft] or [DPadRight]");
         }
 
@@ -236,9 +236,15 @@ public class TrainerManager : MonoBehaviour
                         // Spawn random weapon
                         if (controller.mPlayerActions.activeDevice.DPadUp.WasReleased || Input.GetKeyUp(KeyCode.R))
                         {
-                            SpawnRandomWeapon();
+                            SpawnRandomWeapon(false);
                         }
                         
+                        // Spawn random present
+                        if (controller.mPlayerActions.activeDevice.DPadDown.WasReleased || Input.GetKeyUp(KeyCode.P))
+                        {
+                            SpawnRandomWeapon(true);
+                        }
+
                         // Select next weapon for the requesting player
                         if (controller.mPlayerActions.activeDevice.DPadLeft.WasReleased || (Input.GetKeyUp(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)))
                         {
@@ -340,7 +346,7 @@ public class TrainerManager : MonoBehaviour
     /// <summary>
     /// Spawn a random weapon to fall from a random location in the sky.
     /// </summary>
-    private void SpawnRandomWeapon()
+    private void SpawnRandomWeapon(bool spawnAsPresent)
     {
         // Generate a location for the weapon to spawn
         var vector = Vector3.up * 11f + Vector3.forward * UnityEngine.Random.Range(0f, 8f);
@@ -364,13 +370,19 @@ public class TrainerManager : MonoBehaviour
             //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
 
             // Post v1.2.08
-            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, true);
+            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, spawnAsPresent);
 
             return;
         }
 
         // Spawn weapon locally
         var instantiatedWeapon = Instantiate<GameObject>(weapon, vector, Quaternion.identity);
+
+        if (spawnAsPresent)
+        {
+            instantiatedWeapon.GetComponent<WeaponPickUp>().ChangeToPresent();
+        }
+
         GetComponent<GameManager>().mSpawnedWeapons.Add(instantiatedWeapon.GetComponent<Rigidbody>());
     }
 
