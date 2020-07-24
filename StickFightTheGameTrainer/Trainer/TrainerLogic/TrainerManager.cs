@@ -238,6 +238,18 @@ public class TrainerManager : MonoBehaviour
                 Singleton<TrainerOptions>.Instance.DisplayTrainerMenu = !Singleton<TrainerOptions>.Instance.DisplayTrainerMenu;
             }
 
+            // Spawn random weapon (Keyboard)
+            if (Input.GetKeyUp(KeyCode.R))
+            {
+                SpawnRandomWeapon(false);
+            }
+
+            // Spawn random present (Keyboard)
+            if (Input.GetKeyUp(KeyCode.P))
+            {
+                SpawnRandomWeapon(true);
+            }
+
             // Check for shortcut presses by individual players
             if (_controllerHandler != null && _controllerHandler.ActivePlayers != null)
             {
@@ -245,14 +257,14 @@ public class TrainerManager : MonoBehaviour
                 {
                     if (controller != null && controller.mPlayerActions != null && controller.mPlayerActions.activeDevice != null)
                     {
-                        // Spawn random weapon
-                        if (controller.mPlayerActions.activeDevice.DPadUp.WasReleased || Input.GetKeyUp(KeyCode.R))
+                        // Spawn random weapon (Joystick)
+                        if (controller.mPlayerActions.activeDevice.DPadUp.WasReleased)
                         {
                             SpawnRandomWeapon(false);
                         }
 
-                        // Spawn random present
-                        if (controller.mPlayerActions.activeDevice.DPadDown.WasReleased || Input.GetKeyUp(KeyCode.P))
+                        // Spawn random present (Joystick)
+                        if (controller.mPlayerActions.activeDevice.DPadDown.WasReleased)
                         {
                             SpawnRandomWeapon(true);
                         }
