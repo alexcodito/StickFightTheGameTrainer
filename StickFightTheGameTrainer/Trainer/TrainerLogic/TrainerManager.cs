@@ -35,7 +35,7 @@ public class TrainerManager : MonoBehaviour
         // Populate list of weapons to use as reference when resetting defaults.
         var playerObject = LevelEditor.ResourcesManager.Instance.CharacterObject;
         var weaponObjects = playerObject.transform.Find("Weapons");
-        
+
         for (var i = 0; i < weaponObjects.childCount; i++)
         {
             var weaponComponent = weaponObjects.GetChild(i).GetComponent<Weapon>();
@@ -164,7 +164,7 @@ public class TrainerManager : MonoBehaviour
                                                       "- Browse Weapons:\t[Q] for previous or [E] for next");
 
             GUI.Label(new Rect(35f, 270f, 500f, 90f), "<color=grey><b>Xbox 360 Controller Shortcuts</b></color>\r\n" +
-                                                      "- Toggle Menu:\t[LT Button] + [RT Button]\r\n" +
+                                                      "- Toggle Menu:\t[RB] + [A]\r\n" +
                                                       "- Skip Map:\t[RB] + [B]\r\n" +
                                                       "- Spawn Weapon:\t[DPadUp] or [DPadDown]\r\n" +
                                                       "- Browse Weapons:\t[DPadLeft] or [DPadRight]");
@@ -233,7 +233,7 @@ public class TrainerManager : MonoBehaviour
             }
 
             // Toggle display of trainer menu (triggered by any player)
-            if ((Input.GetKeyUp(KeyCode.JoystickButton9) && Input.GetKeyUp(KeyCode.JoystickButton8)) || (Input.GetKeyUp(KeyCode.JoystickButton9) && Input.GetKey(KeyCode.JoystickButton8)) || (Input.GetKeyUp(KeyCode.JoystickButton8) && Input.GetKey(KeyCode.JoystickButton9)) || Input.GetKeyUp(KeyCode.M))
+            if ((Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKeyUp(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKey(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.M)))
             {
                 Singleton<TrainerOptions>.Instance.DisplayTrainerMenu = !Singleton<TrainerOptions>.Instance.DisplayTrainerMenu;
             }
@@ -250,7 +250,7 @@ public class TrainerManager : MonoBehaviour
                         {
                             SpawnRandomWeapon(false);
                         }
-                        
+
                         // Spawn random present
                         if (controller.mPlayerActions.activeDevice.DPadDown.WasReleased || Input.GetKeyUp(KeyCode.P))
                         {
@@ -303,7 +303,7 @@ public class TrainerManager : MonoBehaviour
 
                             controller.fighting.Dissarm();
                             controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
-                                                        
+
                             // Add a dot after the weapon number
                             if (controller.fighting != null && controller.fighting.weapon != null && controller.fighting.weapon.name != null)
                             {
@@ -476,7 +476,7 @@ public class TrainerManager : MonoBehaviour
                 {
                     var weaponComponent = _weaponComponents[i];
                     var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
-                    
+
                     weapon.fullAuto = weaponComponent.fullAuto;
 
                     if (activePlayer.fighting.weapon != null && activePlayer.fighting.weapon.name == weaponComponent.name)
