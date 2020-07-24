@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using InControl;
 
 public class TrainerManager : MonoBehaviour
@@ -24,6 +25,7 @@ public class TrainerManager : MonoBehaviour
     {
         _weaponComponents = new List<Weapon>();
         _controllerHandler = GetComponent<ControllerHandler>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
 #if DEBUG
         Application.logMessageReceived += HandleUnityLogs;
@@ -48,7 +50,6 @@ public class TrainerManager : MonoBehaviour
 #if DEBUG
         DisplayUnityLogs(450f, 25f, 410f, 330f);
 #endif
-
         if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             // Draw menu container and title
@@ -75,7 +76,7 @@ public class TrainerManager : MonoBehaviour
                 Singleton<TrainerOptions>.Instance.DisplayFps = !Singleton<TrainerOptions>.Instance.DisplayFps;
             }
 
-            GUI.Label(new Rect(35f, 80f, 400f, 90f), "<color=grey><b>Toggle Options </b></color>");
+            GUI.Label(new Rect(35f, 80f, 400f, 90f), "<color=grey><b>Toggle Options</b></color>");
 
             // Toggle between 'Online (no-cheats)' and 'Online Friends (cheats)' mode
             if (GUI.Toggle(new Rect(35f, 100f, 100f, 25f), Singleton<TrainerOptions>.Instance.TrainerActive, !Singleton<TrainerOptions>.Instance.TrainerActive
@@ -333,6 +334,16 @@ public class TrainerManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Main scene has loaded (e.g. game restarted)
+        if (scene != null && scene.name == "MainScene")
+        {
+            // Reset trainer options
+            Singleton<TrainerOptions>.Instance.ResetOptions();
         }
     }
 
