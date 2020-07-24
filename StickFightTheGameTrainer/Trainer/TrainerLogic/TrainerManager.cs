@@ -15,6 +15,7 @@ public class TrainerManager : MonoBehaviour
     private ControllerHandler _controllerHandler;
     private MapWrapper _currentMap;
     private readonly IList<Weapon> _weaponComponents;
+    private int _playerCount;
 
 #if DEBUG
     private Vector2 _unityLogsScrollPosition = Vector2.zero;
@@ -214,6 +215,18 @@ public class TrainerManager : MonoBehaviour
 
                 // Re-enable options for active players
                 ReapplyToggleOptions();
+            }
+
+            // Keep track of players
+            if(_playerCount != _controllerHandler.ActivePlayers.Count)
+            {
+                if(_controllerHandler.ActivePlayers.Count > _playerCount)
+                {
+                    // New player joined - Reapply options for all players 
+                    ReapplyToggleOptions();
+                }
+
+                _playerCount = _controllerHandler.ActivePlayers.Count;
             }
 
             // Change map / level (triggered by any player)
