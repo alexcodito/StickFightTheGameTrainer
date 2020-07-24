@@ -12,6 +12,7 @@ public class TrainerManager : MonoBehaviour
     private float _deltaTime;
     private bool _isCoroutineExecuting;
     private ControllerHandler _controllerHandler;
+    private MapWrapper _currentMap;
     private readonly IList<Weapon> _weaponComponents;
 
 #if DEBUG
@@ -203,6 +204,17 @@ public class TrainerManager : MonoBehaviour
         _deltaTime += (Time.unscaledDeltaTime - _deltaTime) * 0.1f;
         if (Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
+            // Keep track of map / level changes
+            var currentMap = MultiplayerManager.mGameManager.GetCurrentMap();
+            if (_currentMap != currentMap)
+            {
+                // New map / level has been loaded
+                _currentMap = currentMap;
+
+                // Re-enable options for active players
+                ReapplyToggleOptions();
+            }
+
             // Change map / level (triggered by any player)
             if ((Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKeyUp(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.S)))
             {
