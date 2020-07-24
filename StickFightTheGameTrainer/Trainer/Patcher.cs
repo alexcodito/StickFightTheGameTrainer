@@ -222,6 +222,7 @@ namespace StickFightTheGameTrainer.Trainer
             await _logger.Log(patcherVersion);
 
             // Set the below fields and methods as public in order to allow TrainerLogic.dll's code to reference them and compile.
+            // Note: While it would have been convenient to simply set *every* field and method as public/internal, it causes in-game glitches (e.g. ambiguous references and null reference exceptions)
             await _logger.Log("Setting fields as public");
             _targetFields.ForEach(async targetField => await _injectionHelpers.SetFieldAccessModifier(_targetModule, targetField.Key, targetField.Value, FieldAttributes.Public));
 
