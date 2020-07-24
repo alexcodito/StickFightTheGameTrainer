@@ -1,15 +1,18 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Text;
+using System.Collections;
+using System.Collections.Generic;
 using Steamworks;
 using UnityEngine;
+using InControl;
 
 public class TrainerManager : MonoBehaviour
 {
-    public float deltaTime;
-    public bool isCoroutineExecuting;
-    public ControllerHandler controllerHandler;
+    private float _deltaTime;
+    private bool _isCoroutineExecuting;
+    private ControllerHandler _controllerHandler;
+    private readonly IList<Weapon> _weaponComponents;
 
 #if DEBUG
     private Vector2 _unityLogsScrollPosition = Vector2.zero;
@@ -18,189 +21,31 @@ public class TrainerManager : MonoBehaviour
 
     public TrainerManager()
     {
-        // Do not initialize objects here.
-    }
-
-    public void Start()
-    {
-        // Initialize objects on Unity's Start method instead of the constructor.
-        controllerHandler = GetComponent<ControllerHandler>();
+        _weaponComponents = new List<Weapon>();
+        _controllerHandler = GetComponent<ControllerHandler>();
 
 #if DEBUG
         Application.logMessageReceived += HandleUnityLogs;
 #endif
     }
 
-    /// <summary>
-    /// Check if trainer cheats are enabled.
-    /// </summary>
-    private bool CheckCheatsEnabled()
+    public void Start()
     {
-        return Singleton<TrainerOptions>.Instance.CheatsEnabled;
-    }
-
-    /// <summary>
-    /// Change map / level
-    /// </summary>
-    /// <param name="nextLevel">Next level to change to.</param>
-    /// <param name="indexOfWinner">Index of winning player.</param>
-    public void ChangeMap(MapWrapper nextLevel, byte indexOfWinner)
-    {
-        GetComponent<MultiplayerManager>().UnReadyAllPlayers();
-        var array = new byte[2 + nextLevel.MapData.Length];
-        using (MemoryStream memoryStream = new MemoryStream(array))
+        // Populate list of weapons to use as reference when resetting defaults.
+        var playerObject = LevelEditor.ResourcesManager.Instance.CharacterObject;
+        var weaponObjects = playerObject.transform.Find("Weapons");
+        
+        for (var i = 0; i < weaponObjects.childCount; i++)
         {
-            using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-            {
-                binaryWriter.Write(indexOfWinner);
-                binaryWriter.Write(nextLevel.MapType);
-                binaryWriter.Write(nextLevel.MapData);
-            }
-        }
-
-        // Notify all clients that the map is changing.
-        GetComponent<MultiplayerManager>().SendMessageToAllClients(array, P2PPackageHandler.MsgType.MapChange, false, 0UL, EP2PSend.k_EP2PSendReliable, 0);
-    }
-
-    /// <summary>
-    /// Spawn a random weapon to fall from a random location in the sky.
-    /// </summary>
-    public void SpawnRandomWeapon()
-    {
-        // Generate a location for the weapon to spawn
-        var vector = Vector3.up * 11f + Vector3.forward * UnityEngine.Random.Range(0f, 8f);
-
-        // Fetch a random weapon index
-        GameObject original;
-        var randomWeaponIndex = GetComponent<GameManager>().m_WeaponSelectionHandler.GetRandomWeaponIndex(true, out original);
-
-        if (randomWeaponIndex < 0)
-        {
-            return;
-        }
-
-        // Delegate spawning of the weapon to the network manager
-        if (MatchmakingHandler.IsNetworkMatch)
-        {
-            // Updates to the game may result in changes to method signatures (e.g. additional parameters).
-            // TrainerLogicModuleBuilder will uncomment the appropriate lines depending on the target version of the game.
-
-            // Pre v1.2.08
-            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
-
-            // Post v1.2.08
-            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, true);
-
-            return;
-        }
-
-        // Spawn weapon locally
-        var gameObject = Instantiate<GameObject>(original, vector, Quaternion.identity);
-        GetComponent<GameManager>().mSpawnedWeapons.Add(gameObject.GetComponent<Rigidbody>());
-    }
-
-    public void ToggleFlyingMode()
-    {
-        // Todo:
-        // - Fly mode has to be reset every time map changes
-        // - - This needs to be activated once on toggle and also once a player joins 
-        foreach (Controller controller in MultiplayerManager.mGameManager.controllerHandler.players)
-        {
-            if (controller != null)
-            {
-                controller.canFly = Singleton<TrainerOptions>.Instance.FlightMode;
-            }
-        }
-    }
-
-    public void ToggleUncappedFirerate()
-    {
-        foreach (Controller controller in controllerHandler.ActivePlayers)
-        {
-            // Set uncapped firerate
-            if (Singleton<TrainerOptions>.Instance.UncappedFirerate)
-            {
-                if (controller.fighting.weapon != null)
-                {
-                    controller.fighting.weapon.cd = 0f;
-                    controller.fighting.weapon.reloads = false;
-                    controller.fighting.weapon.reloadTime = 0f;
-                    controller.fighting.weapon.shotsBeforeReload = 9999;
-                }
-            }
-            else
-            {
-                // Todo: Set defaults
-            }
-        }
-    }
-
-    public void ToggleFullAuto()
-    {
-        foreach (Controller controller in controllerHandler.ActivePlayers)
-        {
-            // Set uncapped full auto
-            if (Singleton<TrainerOptions>.Instance.FullAuto)
-            {
-                if (controller.fighting.weapon != null)
-                {
-                    controller.fighting.weapon.fullAuto = true;
-                    controller.fighting.fullAuto = true;
-                }
-            }
-            else
-            {
-                // Todo: Set defaults
-            }
-        }
-    }
-
-    public void ToggleUnlimitedAmmo()
-    {
-        foreach (Controller controller in controllerHandler.ActivePlayers)
-        {
-            // Set unlimited ammunition
-            if (Singleton<TrainerOptions>.Instance.UnlimitedAmmo)
-            {
-                if (controller.fighting.weapon != null)
-                {
-                    controller.fighting.weapon.currentCharge = 9999f;
-                    controller.fighting.weapon.secondsOfUseLeft = 9999f;
-                }
-
-                controller.fighting.bulletsLeft = 9999;
-            }
-            else
-            {
-                // Todo: Set defaults
-            }
-        }
-    }
-
-    public void ToggleNoRecoil()
-    {
-        foreach (Controller controller in controllerHandler.ActivePlayers)
-        {
-            // Set no recoil
-            if (Singleton<TrainerOptions>.Instance.NoRecoil)
-            {
-                if (controller.fighting.weapon != null)
-                {
-                    controller.fighting.weapon.recoil = 0f;
-                    controller.fighting.weapon.torsoRecoil = 0f;
-                }
-            }
-            else
-            {
-                // Todo: Set defaults
-            }
+            var weaponComponent = weaponObjects.GetChild(i).GetComponent<Weapon>();
+            _weaponComponents.Add(weaponComponent);
         }
     }
 
     public void OnGUI()
     {
 #if DEBUG
-        DisplayLogs(450f, 25f, 410f, 330f);
+        DisplayUnityLogs(450f, 25f, 410f, 330f);
 #endif
 
         if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
@@ -214,8 +59,8 @@ public class TrainerManager : MonoBehaviour
             string msFps;
             if (Singleton<TrainerOptions>.Instance.DisplayFps)
             {
-                float num = this.deltaTime * 1000f;
-                float num2 = 1f / this.deltaTime;
+                float num = this._deltaTime * 1000f;
+                float num2 = 1f / this._deltaTime;
                 msFps = string.Format(" {0:0.0} ms ({1:0} fps)", num, num2);
             }
             else
@@ -355,7 +200,7 @@ public class TrainerManager : MonoBehaviour
 
     public void Update()
     {
-        deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+        _deltaTime += (Time.unscaledDeltaTime - _deltaTime) * 0.1f;
         if (Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             // Change map / level (triggered by any player)
@@ -382,9 +227,9 @@ public class TrainerManager : MonoBehaviour
             }
 
             // Check for shortcut presses by individual players
-            if (controllerHandler != null && controllerHandler.ActivePlayers != null)
+            if (_controllerHandler != null && _controllerHandler.ActivePlayers != null)
             {
-                foreach (Controller controller in controllerHandler.ActivePlayers)
+                foreach (Controller controller in _controllerHandler.ActivePlayers)
                 {
                     if (controller != null && controller.mPlayerActions != null && controller.mPlayerActions.activeDevice != null)
                     {
@@ -393,7 +238,7 @@ public class TrainerManager : MonoBehaviour
                         {
                             SpawnRandomWeapon();
                         }
-
+                        
                         // Select next weapon for the requesting player
                         if (controller.mPlayerActions.activeDevice.DPadLeft.WasReleased || (Input.GetKeyUp(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)))
                         {
@@ -440,7 +285,7 @@ public class TrainerManager : MonoBehaviour
 
                             controller.fighting.Dissarm();
                             controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
-
+                                                        
                             // Add a dot after the weapon number
                             if (controller.fighting != null && controller.fighting.weapon != null && controller.fighting.weapon.name != null)
                             {
@@ -459,6 +304,250 @@ public class TrainerManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Check if trainer cheats are enabled.
+    /// </summary>
+    private bool CheckCheatsEnabled()
+    {
+        return Singleton<TrainerOptions>.Instance.CheatsEnabled;
+    }
+
+    /// <summary>
+    /// Change map / level
+    /// </summary>
+    /// <param name="nextLevel">Next level to change to.</param>
+    /// <param name="indexOfWinner">Index of winning player.</param>
+    private void ChangeMap(MapWrapper nextLevel, byte indexOfWinner)
+    {
+        GetComponent<MultiplayerManager>().UnReadyAllPlayers();
+        var array = new byte[2 + nextLevel.MapData.Length];
+        using (MemoryStream memoryStream = new MemoryStream(array))
+        {
+            using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+            {
+                binaryWriter.Write(indexOfWinner);
+                binaryWriter.Write(nextLevel.MapType);
+                binaryWriter.Write(nextLevel.MapData);
+            }
+        }
+
+        // Notify all clients that the map is changing.
+        GetComponent<MultiplayerManager>().SendMessageToAllClients(array, P2PPackageHandler.MsgType.MapChange, false, 0UL, EP2PSend.k_EP2PSendReliable, 0);
+    }
+
+    /// <summary>
+    /// Spawn a random weapon to fall from a random location in the sky.
+    /// </summary>
+    private void SpawnRandomWeapon()
+    {
+        // Generate a location for the weapon to spawn
+        var vector = Vector3.up * 11f + Vector3.forward * UnityEngine.Random.Range(0f, 8f);
+
+        // Fetch a random weapon index
+        GameObject weapon;
+        var randomWeaponIndex = GetComponent<GameManager>().m_WeaponSelectionHandler.GetRandomWeaponIndex(true, out weapon);
+
+        if (randomWeaponIndex < 0)
+        {
+            return;
+        }
+
+        // Delegate spawning of the weapon to the network manager
+        if (MatchmakingHandler.IsNetworkMatch)
+        {
+            // Updates to the game may result in changes to method signatures (e.g. additional parameters).
+            // TrainerLogicModuleBuilder will uncomment the appropriate lines depending on the target version of the game.
+
+            // Pre v1.2.08
+            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
+
+            // Post v1.2.08
+            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, true);
+
+            return;
+        }
+
+        // Spawn weapon locally
+        var instantiatedWeapon = Instantiate<GameObject>(weapon, vector, Quaternion.identity);
+        GetComponent<GameManager>().mSpawnedWeapons.Add(instantiatedWeapon.GetComponent<Rigidbody>());
+    }
+
+    private void ToggleFlyingMode()
+    {
+        // Todo:
+        // - This needs to be re-applied when new players join
+        foreach (Controller player in MultiplayerManager.mGameManager.controllerHandler.players)
+        {
+            if (player != null)
+            {
+                player.canFly = Singleton<TrainerOptions>.Instance.FlightMode;
+            }
+        }
+    }
+
+    private void ToggleUncappedFirerate()
+    {
+        foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
+        {
+            var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
+
+            if (Singleton<TrainerOptions>.Instance.UncappedFirerate)
+            {
+                // Set uncapped fire-rate on each player's set of weapons
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.cd = 0;
+                    weapon.reloads = false;
+                    weapon.reloadTime = 0;
+                    weapon.shotsBeforeReload = 9999;
+                }
+            }
+            else
+            {
+                // Reset default weapon settings
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weaponComponent = _weaponComponents[i];
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.cd = weaponComponent.cd;
+                    weapon.reloads = weaponComponent.reloads;
+                    weapon.reloadTime = weaponComponent.reloadTime;
+                    weapon.shotsBeforeReload = weaponComponent.shotsBeforeReload;
+                }
+            }
+        }
+    }
+
+    private void ToggleFullAuto()
+    {
+        foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
+        {
+            var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
+
+            if (Singleton<TrainerOptions>.Instance.FullAuto)
+            {
+                // Set uncapped full auto on each player's set of weapons
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.fullAuto = true;
+                }
+
+                if (activePlayer.fighting.weapon != null)
+                {
+                    activePlayer.fighting.weapon.fullAuto = true;
+                    activePlayer.fighting.fullAuto = true;
+                }
+            }
+            else
+            {
+                // Reset default weapon settings
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weaponComponent = _weaponComponents[i];
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+                    
+                    weapon.fullAuto = weaponComponent.fullAuto;
+
+                    if (activePlayer.fighting.weapon != null && activePlayer.fighting.weapon.name == weaponComponent.name)
+                    {
+                        activePlayer.fighting.weapon.fullAuto = weaponComponent.fullAuto;
+                        activePlayer.fighting.fullAuto = weaponComponent.fullAuto;
+                    }
+                }
+            }
+        }
+    }
+
+    private void ToggleUnlimitedAmmo()
+    {
+        foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
+        {
+            var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
+
+            if (Singleton<TrainerOptions>.Instance.UnlimitedAmmo)
+            {
+                // Set unlimited ammunition on each player's set of weapons
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.startBullets = 9999;
+                    weapon.currentCharge = 9999;
+                    weapon.secondsOfUseLeft = 9999;
+                }
+
+                if (activePlayer.fighting.weapon != null)
+                {
+                    activePlayer.fighting.bulletsLeft = 9999;
+                }
+            }
+            else
+            {
+                // Reset default weapon settings
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weaponComponent = _weaponComponents[i];
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.startBullets = weaponComponent.startBullets;
+                    weapon.currentCharge = weaponComponent.currentCharge;
+                    weapon.secondsOfUseLeft = weaponComponent.secondsOfUseLeft;
+
+                    if (activePlayer.fighting.weapon != null && activePlayer.fighting.weapon.name == weaponComponent.name)
+                    {
+                        activePlayer.fighting.bulletsLeft = weaponComponent.startBullets;
+                    }
+                }
+            }
+        }
+    }
+
+    private void ToggleNoRecoil()
+    {
+        foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
+        {
+            var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
+
+            if (Singleton<TrainerOptions>.Instance.NoRecoil)
+            {
+                // Set unlimited ammunition on each player's set of weapons
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.recoil = 0;
+                    weapon.torsoRecoil = 0;
+                }
+            }
+            else
+            {
+                // Reset default weapon settings
+                for (var i = 0; i < activePlayer.fighting.weapons.transform.childCount; i++)
+                {
+                    var weaponComponent = _weaponComponents[i];
+                    var weapon = activePlayer.fighting.weapons.transform.GetChild(i).GetComponent<Weapon>();
+
+                    weapon.recoil = weaponComponent.recoil;
+                    weapon.torsoRecoil = weaponComponent.torsoRecoil;
+                }
+            }
+        }
+    }
+
+    private void ReapplyToggleOptions()
+    {
+        ToggleFlyingMode();
+        ToggleFullAuto();
+        ToggleNoRecoil();
+        ToggleUncappedFirerate();
+        ToggleUnlimitedAmmo();
     }
 
     /// <summary>
@@ -493,7 +582,7 @@ public class TrainerManager : MonoBehaviour
     }
 
 #if DEBUG
-    private void DisplayLogs(float x, float y, float width, float height)
+    private void DisplayUnityLogs(float x, float y, float width, float height)
     {
         GUI.Box(new Rect(x, y, width, height), "");
         if (GUI.Button(new Rect(x + width - 50f, y + height + 10f, 50f, 30f), "Clear"))
