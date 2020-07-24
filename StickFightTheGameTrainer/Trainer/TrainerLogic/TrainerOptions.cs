@@ -37,6 +37,16 @@ public class TrainerOptions : Singleton<TrainerOptions>
         }
     }
 
+    public void ResetOptions()
+    {
+        FlightMode = false;
+        UncappedFirerate = false;
+        NoRecoil = false;
+        UnlimitedAmmo = false;
+        FullAuto = false;
+        UnlimitedHealth = false;
+    }
+
     public bool TrainerActive;
 
     public bool DisplayTrainerMenu;
