@@ -49,6 +49,8 @@ namespace StickFightTheGameTrainer.Trainer
                     throw new Exception($"File does not contain any data: '{filename}'");
                 }
 
+                contents = ProcessModuleSource(contents, version);
+
                 decryptedModules.Add(contents);
             }
 #endif
