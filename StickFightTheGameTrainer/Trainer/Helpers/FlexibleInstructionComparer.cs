@@ -15,7 +15,7 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             // - E.g. Can't calculate branch condition offset, so consider Brtrue instructions equal regardless of operand (i.e. the 
             // signature's Brtrue instruction operand would be null as the jump address is irrelevant)
             // Note: Can get false positives on small signatures.
-            var flexibleOpcodes = new List<OpCode> { OpCodes.Brtrue, OpCodes.Brfalse };
+            var flexibleOpcodes = new List<OpCode> { OpCodes.Br, OpCodes.Brtrue, OpCodes.Brfalse };
 
             if (x != null && y != null)
             {
