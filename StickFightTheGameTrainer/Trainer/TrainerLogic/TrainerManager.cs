@@ -11,11 +11,14 @@ using InControl;
 public class TrainerManager : MonoBehaviour
 {
     private float _deltaTime;
-    private bool _isCoroutineExecuting;
-    private ControllerHandler _controllerHandler;
-    private MapWrapper _currentMap;
-    private readonly IList<Weapon> _weaponComponents;
     private int _playerCount;
+    private bool _isCoroutineExecuting;
+    private MapWrapper _currentMap;
+    private ControllerHandler _controllerHandler;
+    private HoardHandler hoardHandlerBrat;
+    private HoardHandler hoardHandlerPlayer;
+    private HoardHandler hoardHandlerZombie;
+    private readonly IList<Weapon> _weaponComponents;
 
 #if DEBUG
     private Vector2 _unityLogsScrollPosition = Vector2.zero;
@@ -35,6 +38,25 @@ public class TrainerManager : MonoBehaviour
 
     public void Start()
     {
+        // Load hoard handlers for AI spawning
+        var hoardHandlers = Resources.FindObjectsOfTypeAll<HoardHandler>();
+
+        foreach (HoardHandler hoardHandler in hoardHandlers)
+        {
+            if (hoardHandler.name == "AI spawner")
+            {
+                hoardHandlerPlayer = hoardHandler;
+            }
+            if (hoardHandler.name == "AI spawner (1)")
+            {
+                hoardHandlerBrat = hoardHandler;
+            }
+            if (hoardHandler.name == "AI spawner (2)")
+            {
+                hoardHandlerZombie = hoardHandler;
+            }
+        }
+
         // Populate list of weapons to use as reference when resetting defaults.
         var playerObject = LevelEditor.ResourcesManager.Instance.CharacterObject;
         var weaponObjects = playerObject.transform.Find("Weapons");
@@ -49,14 +71,14 @@ public class TrainerManager : MonoBehaviour
     public void OnGUI()
     {
 #if DEBUG
-        DisplayUnityLogs(450f, 25f, 410f, 330f);
+        DisplayUnityLogs(430f, 25f, 390f, 380f);
 #endif
         if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             // Draw menu container and title
-            GUI.Box(new Rect(25f, 25f, 410f, 330f), "");
+            GUI.Box(new Rect(25f, 25f, 390f, 380f), "");
             GUI.Label(new Rect(35f, 30f, 280f, 25f), "<color=silver><b>Stick Fight The Game</b></color>");
-            GUI.Label(new Rect(35f, 50f, 425f, 25f), "<color=silver><b>+11 Trainer v{Application.ProductVersion} - Made by loxa</b></color>");
+            GUI.Label(new Rect(35f, 50f, 425f, 25f), "<color=silver><b>+12 Trainer v{Application.ProductVersion} - Made by loxa</b></color>");
 
             // Calculate frame-rate
             string msFps;
@@ -72,7 +94,7 @@ public class TrainerManager : MonoBehaviour
             }
 
             // Display frame-rate
-            if (GUI.Toggle(new Rect(310f, 30f, 120f, 25f), Singleton<TrainerOptions>.Instance.DisplayFps, "<color=maroon><b>" + msFps + "</b></color>") != Singleton<TrainerOptions>.Instance.DisplayFps)
+            if (GUI.Toggle(new Rect(290f, 30f, 120f, 25f), Singleton<TrainerOptions>.Instance.DisplayFps, "<color=maroon><b>" + msFps + "</b></color>") != Singleton<TrainerOptions>.Instance.DisplayFps)
             {
                 Singleton<TrainerOptions>.Instance.DisplayFps = !Singleton<TrainerOptions>.Instance.DisplayFps;
             }
@@ -158,14 +180,36 @@ public class TrainerManager : MonoBehaviour
                 ToggleNoRecoil();
             }
 
+            GUI.Label(new Rect(35f, 170f, 400f, 90f), "<color=grey><b>Spawn NPCs / Bots</b></color>");
+
+            if (GUI.Button(new Rect(35f, 190f, 75f, 25f), "Dummy"))
+            {
+                SpawnBotDummy();
+            }
+
+            if (GUI.Button(new Rect(120f, 190f, 75f, 25f), "Enemy"))
+            {
+                SpawnBotEnemyPlayer();
+            }
+
+            if (GUI.Button(new Rect(205f, 190f, 75f, 25f), "Zombie"))
+            {
+                SpawnBotEnemyZombie();
+            }
+
+            if (GUI.Button(new Rect(290f, 190f, 75f, 25f), "Brat"))
+            {
+                SpawnBotEnemyBrat();
+            }
+
             // Display available shortcuts
-            GUI.Label(new Rect(35f, 180f, 400f, 90f), "<color=grey><b>PC Keyboard Shortcuts</b></color>\r\n" +
+            GUI.Label(new Rect(35f, 230f, 400f, 90f), "<color=grey><b>PC Keyboard Shortcuts</b></color>\r\n" +
                                                       "- Toggle Menu:\t[SHIFT] + [M]\r\n" +
                                                       "- Skip Map:\t[SHIFT] + [S]\r\n" +
                                                       "- Spawn Weapon:\t[R] or [P]\r\n" +
                                                       "- Browse Weapons:\t[Q] for previous or [E] for next");
 
-            GUI.Label(new Rect(35f, 270f, 500f, 90f), "<color=grey><b>Xbox 360 Controller Shortcuts</b></color>\r\n" +
+            GUI.Label(new Rect(35f, 320f, 500f, 90f), "<color=grey><b>Xbox 360 Controller Shortcuts</b></color>\r\n" +
                                                       "- Toggle Menu:\t[RB] + [A]\r\n" +
                                                       "- Skip Map:\t[RB] + [B]\r\n" +
                                                       "- Spawn Weapon:\t[DPadUp] or [DPadDown]\r\n" +
@@ -213,14 +257,14 @@ public class TrainerManager : MonoBehaviour
                 // New map / level has been loaded
                 _currentMap = currentMap;
 
-                // Re-enable options for active players
+                // Reapply options for all players
                 ReapplyToggleOptions();
             }
 
             // Keep track of players
-            if(_playerCount != _controllerHandler.ActivePlayers.Count)
+            if (_playerCount != _controllerHandler.ActivePlayers.Count)
             {
-                if(_controllerHandler.ActivePlayers.Count > _playerCount)
+                if (_controllerHandler.ActivePlayers.Count > _playerCount)
                 {
                     // New player joined - Reapply options for all players 
                     ReapplyToggleOptions();
@@ -392,6 +436,73 @@ public class TrainerManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Spawn an NPC that deals and takes damage. 
+    private void SpawnBotDummy()
+    {
+        var spawnPosition = Vector3.up * 8f;
+        var spawnRotation = Quaternion.identity;
+        var playerId = MultiplayerManager.mGameManager.controllerHandler.players.Count;
+        var playerColors = MultiplayerManagerAssets.Instance.Colors;
+        var playerPrefab = MultiplayerManagerAssets.Instance.PlayerPrefab;
+        var playerObject = UnityEngine.Object.Instantiate<GameObject>(playerPrefab, spawnPosition, spawnRotation);
+        var playerController = playerObject.GetComponent<Controller>();
+
+        var playerLineRenderers = playerObject.GetComponentsInChildren<LineRenderer>();
+        for (int i = 0; i < playerLineRenderers.Length; i++)
+        {
+            playerLineRenderers[i].sharedMaterial = playerColors[playerId];
+        }
+
+        foreach (var spriteRenderer in playerObject.GetComponentsInChildren<SpriteRenderer>())
+        {
+            if (spriteRenderer.transform.tag != "DontChangeColor")
+            {
+                spriteRenderer.color = playerColors[playerId].color;
+            }
+        }
+
+        var characterInformation = playerObject.GetComponent<CharacterInformation>();
+        characterInformation.myMaterial = playerColors[playerId];
+        characterInformation.enabled = true;
+
+        playerController.AssignNewDevice(null, false); // Uninitialized mPlayerActions causes NULL reference exception in Controller.Update. 
+        playerController.playerID = playerId;
+        playerController.isAI = true;
+        playerController.enabled = true;
+        playerController.inactive = false;
+        playerController.SetCollision(true);
+
+        playerController.Start(); // Stops the bot from 'flying away' (glitch workaround for this.m_Players)
+
+        // WIP Tests 
+        //
+        //MultiplayerManager.SpawnPlayerDummy((byte)playerId);
+        //playerObject.FetchComponent<NetworkPlayer>().InitNetworkSpawnID((ushort)playerId);
+        //UnityEngine.Object.FindObjectOfType<MultiplayerManager>().PlayerControllers.Add(playerController);
+        //this.UpdateLocalClientsData(playerId, playerObject);
+        //this.m_Players[playerId] = playerController;
+        //
+
+        MultiplayerManager.mGameManager.controllerHandler.players.Add(playerController);
+        MultiplayerManager.mGameManager.RevivePlayer(playerController, true);
+    }
+
+    private void SpawnBotEnemyPlayer()
+    {
+        MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerPlayer.character);
+    }
+
+    private void SpawnBotEnemyZombie()
+    {
+        MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerZombie.character);
+    }
+
+    private void SpawnBotEnemyBrat()
+    {
+        MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerBrat.character);
+    }
+
+    /// <summary>
     /// Spawn a random weapon to fall from a random location in the sky.
     /// </summary>
     private void SpawnRandomWeapon(bool spawnAsPresent)
@@ -436,8 +547,6 @@ public class TrainerManager : MonoBehaviour
 
     private void ToggleFlyingMode()
     {
-        // Todo:
-        // - This needs to be re-applied when new players join
         foreach (Controller player in MultiplayerManager.mGameManager.controllerHandler.players)
         {
             if (player != null)
@@ -451,6 +560,11 @@ public class TrainerManager : MonoBehaviour
     {
         foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
         {
+            if (activePlayer.fighting == null || activePlayer.fighting.weapons == null)
+            {
+                continue;
+            }
+
             var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
 
             if (Singleton<TrainerOptions>.Instance.UncappedFirerate)
@@ -487,6 +601,11 @@ public class TrainerManager : MonoBehaviour
     {
         foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
         {
+            if (activePlayer.fighting == null || activePlayer.fighting.weapons == null)
+            {
+                continue;
+            }
+
             var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
 
             if (Singleton<TrainerOptions>.Instance.FullAuto)
@@ -529,6 +648,11 @@ public class TrainerManager : MonoBehaviour
     {
         foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
         {
+            if (activePlayer.fighting == null || activePlayer.fighting.weapons == null)
+            {
+                continue;
+            }
+
             var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
 
             if (Singleton<TrainerOptions>.Instance.UnlimitedAmmo)
@@ -573,6 +697,11 @@ public class TrainerManager : MonoBehaviour
     {
         foreach (Controller activePlayer in _controllerHandler.ActivePlayers)
         {
+            if (activePlayer.fighting == null || activePlayer.fighting.weapons == null)
+            {
+                continue;
+            }
+
             var weapons = activePlayer.fighting.weapons.transform.GetComponentsInChildren<Weapon>();
 
             if (Singleton<TrainerOptions>.Instance.NoRecoil)
