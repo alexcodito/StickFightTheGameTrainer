@@ -247,5 +247,20 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
 
             return null;
         }
+
+        public static List<Instruction> FetchInstructionsByOpcodeSignature(IList<Instruction> instructions, IList<Instruction> signatureInstructions)
+        {
+            for (var i = 0; i <= instructions.Count - signatureInstructions.Count; i++)
+            {
+                var subset = instructions.Skip(i).Take(signatureInstructions.Count).ToArray();
+
+                if (subset.SequenceEqual(signatureInstructions, new OpCodeInstructionComparer()))
+                {
+                    return subset.ToList();
+                }
+            }
+
+            return null;
+        }
     }
 }

@@ -136,6 +136,7 @@
     </Compile>
     <Compile Include="Reference\GameDirectories.cs" />
     <Compile Include="DependencyInjection\Registries\TrainerRegistry.cs" />
+    <Compile Include="Trainer\Helpers\OpCodeInstructionComparer.cs" />
     <Compile Include="Trainer\Helpers\FlexibleInstructionComparer.cs" />
     <Compile Include="Trainer\Helpers\InjectionHelpers.cs" />
     <Compile Include="Trainer\Helpers\InstructionComparer.cs" />
