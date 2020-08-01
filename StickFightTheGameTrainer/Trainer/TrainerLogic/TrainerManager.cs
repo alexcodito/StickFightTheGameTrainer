@@ -169,7 +169,7 @@ public class TrainerManager : MonoBehaviour
             // Toggle unlimited health
             if (GUI.Toggle(new Rect(240f, 140f, 150f, 25f), Singleton<TrainerOptions>.Instance.UnlimitedHealth, " Unlimited Health") != Singleton<TrainerOptions>.Instance.UnlimitedHealth)
             {
-                Singleton<TrainerOptions>.Instance.UnlimitedHealth = !Singleton<TrainerOptions>.Instance.UnlimitedHealth;
+                 Singleton<TrainerOptions>.Instance.UnlimitedHealth = !Singleton<TrainerOptions>.Instance.UnlimitedHealth;
                 // Handled in the patched TakeDamage method
             }
 
@@ -549,7 +549,7 @@ public class TrainerManager : MonoBehaviour
     {
         foreach (Controller player in MultiplayerManager.mGameManager.controllerHandler.players)
         {
-            if (player != null)
+            if (player != null && player.isAI == false)
             {
                 player.canFly = Singleton<TrainerOptions>.Instance.FlightMode;
             }
