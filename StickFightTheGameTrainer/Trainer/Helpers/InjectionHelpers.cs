@@ -46,8 +46,8 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
                     return true;
                 }
 
-                moduleDefMdTarget.Types.Remove(existingTypeDef);
-            }
+                    moduleDefMdTarget.Types.Remove(existingTypeDef);
+                }
 
             // Detach from associated module before injecting into target
             if (detachFromSourceModuleTypes)
@@ -58,6 +58,24 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             moduleDefMdTarget.Types.Add(typeDef);
 
             return true;
+        }
+
+        public bool RemoveTypeFromModule(string typeName, ModuleDefMD moduleDefMdTarget)
+        {
+            if (typeName == null || moduleDefMdTarget == null)
+            {
+                return false;
+            }
+
+            var typeDefMatch = moduleDefMdTarget.Find(typeName, false);
+
+            if (typeDefMatch != null)
+            {
+                moduleDefMdTarget.Types.Remove(typeDefMatch);
+                return true;
+            }
+
+            return false;
         }
 
         public async Task ClearMethodBody(ModuleDefMD moduleDef, string typeDefName, string methodDefName)
@@ -207,6 +225,91 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             typeDef.Fields.Add(fieldDef);
 
             return await Task.FromResult(fieldDef);
+        }
+
+        public async Task<PropertyDef> AddProperty(ModuleDefMD module, string typeDefName, string propertyName, PropertySig type, PropertyAttributes propertyAttributeLeft)
+        {
+            var typeDef = module.Find(typeDefName, true);
+
+            if (typeDef == null)
+            {
+                await _logger.Log($"Add Property: Type def not found: {typeDefName}");
+                return null;
+            }
+
+            var propertyDef = new PropertyDefUser(propertyName,
+                type,
+                propertyAttributeLeft);
+
+            var existingTypeDef = typeDef.Properties.FirstOrDefault(property => property.Name == propertyName);
+            if (existingTypeDef != null)
+            {
+                await _logger.Log($"Add Property: Property name '{propertyName}' already exists in type '{typeDefName}'");
+                return existingTypeDef;
+            }
+
+            typeDef.Properties.Add(propertyDef);
+
+            return await Task.FromResult(propertyDef);
+        }
+
+        /// <summary>
+        /// Find all references to a TypeDef and replace them with another TypeDef.
+        /// Note that field and method references from the source TypeDef will also need to be replaced serparately.
+        /// </summary>
+        public void ReplaceAllTypeDefReferences(TypeDef sourceTypeDef, TypeDef destinationTypeDef, ModuleDefMD moduleDefMd)
+        {
+            var types = moduleDefMd.GetTypes();
+
+            var sourceTypeSig = sourceTypeDef.ToTypeSig();
+            var destinationTypeSig = destinationTypeDef.ToTypeSig();
+
+            var sigComparer = new SigComparer();
+
+            foreach (var type in types)
+            {
+                // Fields
+                foreach (var field in type.Fields)
+                {
+                    if (sigComparer.Equals(field.FieldType, sourceTypeSig))
+                    {
+                        field.FieldType = destinationTypeSig;
+                    }
+                }
+
+                // Methods
+                foreach (var method in type.Methods)
+                {
+                    if (method.Body == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var instruction in method.Body.Instructions)
+                    {
+                        if (instruction.Operand != null)
+                        {
+                            if (instruction.Operand is MethodSpec methodSpec && methodSpec.GenericInstMethodSig != null)
+                            {
+                                // Replace generic parameter types
+                                for (var i = methodSpec.GenericInstMethodSig.GenericArguments.Count - 1; i >= 0; i--)
+                                {
+                                    var genericArgument = methodSpec.GenericInstMethodSig.GenericArguments[i];
+                                    var genericArgumentTypeSpec = genericArgument as TypeSig;
+                                    if (sigComparer.Equals(genericArgumentTypeSpec, sourceTypeSig))
+                                    {
+                                        methodSpec.GenericInstMethodSig.GenericArguments.RemoveAt(i);
+                                        methodSpec.GenericInstMethodSig.GenericArguments.Insert(i, destinationTypeSig);
+                                    }
+                                }
+
+                                // Todo: Parameters
+                                // Todo: Return types.
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public static List<Instruction> FetchInstructionsBySignature(IList<Instruction> instructions, IList<OpCode> signatureOpcodes)
