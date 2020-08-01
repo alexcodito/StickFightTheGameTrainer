@@ -17,7 +17,7 @@ namespace StickFightTheGameTrainer.Trainer
         public TrainerLogicModuleBuilder(ILogger logger)
         {
             _logger = logger;
-            _targetSourceCodeFileNames = new List<string> { "Singleton", "TrainerManager", "TrainerOptions" };
+            _targetSourceCodeFileNames = new List<string> { "AILogic", "Singleton", "TrainerManager", "TrainerOptions" };
         }
 
         public List<string> DecryptAndLoadLogicModuleSource(string key, string iv, string version)

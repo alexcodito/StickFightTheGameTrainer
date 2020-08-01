@@ -26,6 +26,16 @@ namespace StickFightTheGameTrainer.Trainer
         // Private game fields that are accessed by TrainerManager.
         private readonly List<KeyValuePair<string, string>> _targetFields = new List<KeyValuePair<string, string>>
         {
+            new KeyValuePair<string, string>("AI", "aimer"),
+            new KeyValuePair<string, string>("AI", "counter"),
+            new KeyValuePair<string, string>("AI", "controller"),
+            new KeyValuePair<string, string>("AI", "controllerHandler"),
+            new KeyValuePair<string, string>("AI", "fighting"),
+            new KeyValuePair<string, string>("AI", "head"),
+            new KeyValuePair<string, string>("AI", "info"),
+            new KeyValuePair<string, string>("AI", "reactionCounter"),
+            new KeyValuePair<string, string>("AI", "targetInformation"),
+            new KeyValuePair<string, string>("AI", "velocity"),
             new KeyValuePair<string, string>("MultiplayerManager", "mGameManager"),
             new KeyValuePair<string, string>("GameManager", "controllerHandler"),
             new KeyValuePair<string, string>("GameManager", "m_WeaponSelectionHandler"),
@@ -81,6 +91,31 @@ namespace StickFightTheGameTrainer.Trainer
             _targetModulePath = _targetModule.Location;
 
             return await Task.FromResult(true);
+        }
+
+        private void ReloadLogicModule(bool reload = true)
+        {
+            var location = _logicModule.Location;
+            _logicModule.Dispose();
+            _logicModule = ModuleDefMD.Load(location);
+        }
+
+        private void DeleteTrainerLogicModule()
+        {
+            var location = _logicModule.Location;
+
+            _logicModule.Dispose();
+            File.Delete(location);
+        }
+
+        private void SaveAndReload(bool reload = true)
+        {
+            _injectionHelpers.Save(_targetModule, true);
+
+            if (reload)
+            {
+                _targetModule = ModuleDefMD.Load(_targetModulePath);
+            }
         }
 
         public async Task EncryptLogicModuleSource()
@@ -224,7 +259,7 @@ namespace StickFightTheGameTrainer.Trainer
             var patcherVersion = $"Patcher version: {Application.ProductVersion}";
             await _logger.Log(patcherVersion);
 
-            // Set the below fields and methods as public in order to allow TrainerLogic.dll's code to reference them and compile.
+            // Set target fields and methods as public in order to allow TrainerLogic.dll's code to reference them and compile.
             // Note: While it would have been convenient to simply set *every* field and method as public/internal, it causes in-game glitches (e.g. ambiguous references and null reference exceptions)
             await _logger.Log("Setting fields as public");
             _targetFields.ForEach(async targetField => await _injectionHelpers.SetFieldAccessModifier(_targetModule, targetField.Key, targetField.Value, FieldAttributes.Public));
@@ -260,12 +295,19 @@ namespace StickFightTheGameTrainer.Trainer
             ReloadLogicModule();
             SaveAndReload();
 
-            await _logger.Log("Injecting TrainerOptions and TrainerManager");
+            await _logger.Log("Injecting trainer logic modules");
 
             // Inject TrainerOptions class
             if (!InjectTrainerLogicModuleTypes())
             {
-                await _logger.Log("Could not inject Logic Module's types", LogLevel.Error);
+                await _logger.Log("Could not inject trainer logic modules", LogLevel.Error);
+            }
+
+            SaveAndReload();
+
+            if (!InjectCustomAILogic())
+            {
+                await _logger.Log("Could not inject AI logic module", LogLevel.Error);
             }
 
             SaveAndReload();
@@ -322,14 +364,6 @@ namespace StickFightTheGameTrainer.Trainer
             await _logger.Log("Patching completed");
 
             return await Task.FromResult(true);
-        }
-
-        private void DeleteTrainerLogicModule()
-        {
-            var location = _logicModule.Location;
-
-            _logicModule.Dispose();
-            File.Delete(location);
         }
 
         private async Task AddTrainerManagerToGameManager()
@@ -505,7 +539,6 @@ namespace StickFightTheGameTrainer.Trainer
 #if DEBUG
                 CompilerOptions = "/d:DEBUG",
 #endif
-
                 IncludeDebugInformation = false,
                 OutputAssembly = trainerLogicDllPath
             };
@@ -513,7 +546,7 @@ namespace StickFightTheGameTrainer.Trainer
             // The game is compiled under .NET 3.5, so this has to be matched.
             var codeProvider = CodeDomProvider.CreateProvider("CSharp", new Dictionary<string, string> { { "CompilerVersion", "v3.5" } });
 
-            var referenceLibraries = new List<string> { "Assembly-CSharp.dll", "Assembly-CSharp-firstpass.dll", "UnityEngine.dll", "UnityEngine.UI.dll" }; // 
+            var referenceLibraries = new List<string> { "Assembly-CSharp.dll", "Assembly-CSharp-firstpass.dll", "UnityEngine.dll", "UnityEngine.UI.dll" };
 
             // Find appropriate TextMeshPro version (e.g. TextMeshPro-1.0.55.56.0b9.dll)
             var textMeshProReferenceLibrary = Directory.GetFiles(referenceLibraryDirectory, "TextMeshPro-*.dll");
@@ -584,14 +617,14 @@ namespace StickFightTheGameTrainer.Trainer
 
              */
 
-            var controllerJumpInstructionSignature = new List<Instruction> { 
-                new Instruction(OpCodes.Ldarg_0), 
-                new Instruction(OpCodes.Ldloc_0), 
+            var controllerJumpInstructionSignature = new List<Instruction> {
+                new Instruction(OpCodes.Ldarg_0),
+                new Instruction(OpCodes.Ldloc_0),
                 new Instruction(OpCodes.Brfalse, new Instruction(OpCodes.Ldc_I4_8, null)),
-                new Instruction(OpCodes.Ldc_I4_4), 
+                new Instruction(OpCodes.Ldc_I4_4),
                 new Instruction(OpCodes.Br, new Instruction(OpCodes.Stfld, null)),
                 new Instruction(OpCodes.Ldc_I4_8),
-                new Instruction(OpCodes.Stfld, controllerMovementStateFieldDef) 
+                new Instruction(OpCodes.Stfld, controllerMovementStateFieldDef)
             };
 
             var matchedControllerJumpMethodInstructions = InjectionHelpers.FetchInstructionsBySignature(controllerJumpMethodDef.Body.Instructions, controllerJumpInstructionSignature, false);
@@ -679,13 +712,13 @@ namespace StickFightTheGameTrainer.Trainer
             var mscorlibAssemblyRef = _targetModule.GetAssemblyRef(new UTF8String("mscorlib"));
             var unityEngineAssemblyRef = _targetModule.GetAssemblyRef(new UTF8String("UnityEngine"));
 
-            // Construct type refs
+            // Construct type ref users
             var systemMathTypeRefUser = new TypeRefUser(_targetModule, new UTF8String("System"), new UTF8String("Math"), mscorlibAssemblyRef);
             var unityEngineAudioClipTypeRefUser = new TypeRefUser(_targetModule, new UTF8String("UnityEngine"), new UTF8String("AudioClip"), unityEngineAssemblyRef);
             var unityEngineRandomTypeRefUser = new TypeRefUser(_targetModule, new UTF8String("UnityEngine"), new UTF8String("Random"), unityEngineAssemblyRef);
             var unityEngineAudioSourceTypeRefUser = new TypeRefUser(_targetModule, new UTF8String("UnityEngine"), new UTF8String("AudioSource"), unityEngineAssemblyRef);
 
-            // Construct type ref users
+            // Construct member ref users
             var maxMethodRefUser = new MemberRefUser(_targetModule, new UTF8String("Max"), MethodSig.CreateStatic(_targetModule.CorLibTypes.Int32, _targetModule.CorLibTypes.Int32, _targetModule.CorLibTypes.Int32), systemMathTypeRefUser);
             var randomRangeMethodRefUser = new MemberRefUser(_targetModule, new UTF8String("Range"), MethodSig.CreateStatic(_targetModule.CorLibTypes.Int32, _targetModule.CorLibTypes.Int32, _targetModule.CorLibTypes.Int32), unityEngineRandomTypeRefUser);
             var playOneShotMethodRefUser = new MemberRefUser(_targetModule, new UTF8String("PlayOneShot"), MethodSig.CreateInstance(_targetModule.CorLibTypes.Void, unityEngineAudioClipTypeRefUser.ToTypeSig()), unityEngineAudioSourceTypeRefUser);
@@ -738,10 +771,13 @@ namespace StickFightTheGameTrainer.Trainer
 
             var bodyPartControllerFieldDef = bodyPartTypeDef.FindField("controller");
 
-            //var opcodeSignature = new List<OpCode> { OpCodes.Ldfld, OpCodes.Brtrue, OpCodes.Ldarg_0 };
-            var instructionSignature = new List<Instruction> { new Instruction(OpCodes.Ldfld, bodyPartControllerFieldDef), new Instruction(OpCodes.Ldfld, canFlyFieldDef), new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_1, null)), new Instruction(OpCodes.Ldarg_0, null) };
+            var instructionSignature = new List<Instruction> { 
+                new Instruction(OpCodes.Ldfld, bodyPartControllerFieldDef), 
+                new Instruction(OpCodes.Ldfld, canFlyFieldDef), 
+                new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_1, null)), 
+                new Instruction(OpCodes.Ldarg_0, null) 
+            };
 
-            //var matchedInstructions = InjectionHelpers.FetchInstructionsBySignature(onCollisionEnterMethod.Body.Instructions, opcodeSignature);
             var matchedInstructions = InjectionHelpers.FetchInstructionsBySignature(onCollisionEnterMethod.Body.Instructions, instructionSignature, false);
 
             if (matchedInstructions != null)
@@ -762,7 +798,11 @@ namespace StickFightTheGameTrainer.Trainer
             var onCollisionEnterMethod = controllerTypeDef.FindMethod("Update");
             var canFlyFieldDef = controllerTypeDef.FindField("canFly");
 
-            var instructionSignature = new List<Instruction> { new Instruction(OpCodes.Ldfld, canFlyFieldDef), new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_0, null)), new Instruction(OpCodes.Ldarg_0, null) };
+            var instructionSignature = new List<Instruction> { 
+                new Instruction(OpCodes.Ldfld, canFlyFieldDef), 
+                new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_0, null)), 
+                new Instruction(OpCodes.Ldarg_0, null) 
+            };
 
             var matchedInstructions = InjectionHelpers.FetchInstructionsBySignature(onCollisionEnterMethod.Body.Instructions, instructionSignature, false);
 
@@ -802,7 +842,7 @@ namespace StickFightTheGameTrainer.Trainer
                 return;
             }
 
-            // There are 2 methods that require patching
+            // There are 2 method overloads that require patching
             var takeDamageMethodDefs = healthHandlerTypeDef.FindMethods("TakeDamage").ToArray();
 
             if (takeDamageMethodDefs.Length != 2)
@@ -892,6 +932,44 @@ namespace StickFightTheGameTrainer.Trainer
 
             return singletonSucceeded && trainerOptionsSucceeded && trainerManagerSucceeded;
         }
+        
+        private bool InjectCustomAILogic()
+        {
+            var sourceModuleAiTypeDef = _targetModule.Find("AI", false);
+            var destinationAiTypeDef = _logicModule.Find("AILogic", false);
+
+            if(sourceModuleAiTypeDef == null || destinationAiTypeDef == null)
+            {
+                return false;
+            }
+
+            var updateMethodDef = sourceModuleAiTypeDef.FindMethod("Update");
+            var customUpdateMethodDef = destinationAiTypeDef.FindMethod("UpdateHandler");
+
+            // Replace all variables, instructions and exception handler in AI.Update from AILogic.UpdateHandler
+            updateMethodDef.Body.Variables.Clear();
+            updateMethodDef.Body.Instructions.Clear();
+            updateMethodDef.Body.ExceptionHandlers.Clear();
+
+            foreach (var variable in customUpdateMethodDef.Body.Variables)
+            {
+                updateMethodDef.Body.Variables.Add(variable);
+            }
+
+            foreach (var instruction in customUpdateMethodDef.Body.Instructions)
+            {
+                updateMethodDef.Body.Instructions.Add(instruction);
+            }
+
+            foreach (var exceptionHandler in customUpdateMethodDef.Body.ExceptionHandlers)
+            {
+                updateMethodDef.Body.ExceptionHandlers.Add(exceptionHandler);
+            }
+
+            updateMethodDef.Body.UpdateInstructionOffsets();
+
+            return true;
+        }
 
         private async Task LoadLogicModule(string logicModulePath)
         {
@@ -907,13 +985,6 @@ namespace StickFightTheGameTrainer.Trainer
             {
                 await _logger.Log("Could not load logic module", LogLevel.Error);
             }
-        }
-
-        private void ReloadLogicModule(bool reload = true)
-        {
-            var location = _logicModule.Location;
-            _logicModule.Dispose();
-            _logicModule = ModuleDefMD.Load(location);
         }
 
         public async Task<string> GetGameVersion()
@@ -1056,16 +1127,6 @@ namespace StickFightTheGameTrainer.Trainer
             foreach (var instruction in logicInstructions)
             {
                 targetGetVersionValueMethodDef.Body.Instructions.Add(instruction);
-            }
-        }
-
-        private void SaveAndReload(bool reload = true)
-        {
-            _injectionHelpers.Save(_targetModule, true);
-
-            if (reload)
-            {
-                _targetModule = ModuleDefMD.Load(_targetModulePath);
             }
         }
     }

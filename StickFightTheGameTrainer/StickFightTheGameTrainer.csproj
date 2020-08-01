@@ -143,6 +143,7 @@
     <Compile Include="Trainer\TrainerLogic\TrainerLogicModule.cs" />
     <Compile Include="Trainer\Patcher.cs" />
     <Compile Include="Trainer\TrainerLogicModuleBuilder.cs" />
+    <None Include="Trainer\TrainerLogic\AILogic.cs" />
     <None Include="app.config" />
     <None Include="Trainer\TrainerLogic\Singleton.cs" />
     <None Include="Trainer\TrainerLogic\TrainerManager.cs" />
