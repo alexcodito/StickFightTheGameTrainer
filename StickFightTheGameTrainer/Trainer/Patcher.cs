@@ -355,6 +355,10 @@ namespace StickFightTheGameTrainer.Trainer
 
             await ApplyBotJumpFix();
 
+            await _logger.Log("Applying bot death fix");
+
+            await ApplyBotDeathFix();
+
             SaveAndReload(false);
 
             DeleteTrainerLogicModule();
@@ -602,9 +606,9 @@ namespace StickFightTheGameTrainer.Trainer
             var controllerMovementStateFieldDef = controllerTypeDef.FindField("m_MovementState");
 
             /*
-                
+
                 Remove redundant code that always sets 'movementState' to 'GroundJump' in the 'Controller.Jump' method.
-            
+
                 Target instructions to patch:
 
                     62	00EE	ldarg.0
@@ -615,7 +619,7 @@ namespace StickFightTheGameTrainer.Trainer
                     67	00FB	ldc.i4.8
                     68	00FC	stfld	valuetype Controller/MovementStateEnum Controller::m_MovementState
 
-             */
+                */
 
             var controllerJumpInstructionSignature = new List<Instruction> {
                 new Instruction(OpCodes.Ldarg_0),
@@ -640,7 +644,7 @@ namespace StickFightTheGameTrainer.Trainer
             }
 
             /*
-                
+
                 The 'Movement.Jump' method unsafely accesses the AudioClip array when selecting a random 'jump' sound to play.
                 Add appropriate length check to fix the index out of bounds exception.      
 
@@ -695,7 +699,7 @@ namespace StickFightTheGameTrainer.Trainer
                     23	0034	callvirt	instance void [UnityEngine]UnityEngine.AudioSource::PlayOneShot(class [UnityEngine]UnityEngine.AudioClip)
                     24	0039	ret
 
-             */
+                */
 
             // Fetch target type defs
             var movementTypeDef = _targetModule.Find("Movement", true);
@@ -761,6 +765,74 @@ namespace StickFightTheGameTrainer.Trainer
             movementJumpMethodDef.Body.UpdateInstructionOffsets();
         }
 
+        /// <summary>
+        /// Make bots that are added to ControllerHandler.Players "die" instead of simply being "removed" like normal AIs.
+        /// </summary>
+        /// <returns></returns>
+        private async Task ApplyBotDeathFix()
+        {
+            // Fetch target type defs
+            var controllerTypeDef = _targetModule.Find("Controller", true);
+            var healthHandlerTypeDef = _targetModule.Find("HealthHandler", true);
+
+            // Fetch target method defs
+            var healthHandlerDieMethodDef = healthHandlerTypeDef.FindMethod("Die");
+
+            // Fetch target field defs
+            var controllerIsAiFieldDef = controllerTypeDef.FindField("isAI");
+            var controllerPlayerIdFieldDef = controllerTypeDef.FindField("playerID");
+            var healthHandlerControllerFieldDef = healthHandlerTypeDef.FindField("controller");
+
+            /*
+            
+                55	009F	brfalse.s	69 (00CB) call bool MatchmakingHandler::get_IsNetworkMatch()
+                56	00A1	ldarg.0
+                57	00A2	ldfld	    class Controller HealthHandler::controller
+                58	00A7	ldfld	    bool Controller::isAI
+                59	00AC	brfalse.s	69 (00CB) call bool MatchmakingHandler::get_IsNetworkMatch()
+
+             */
+
+            // Signature of the condition to which the check will be added
+            var healthHandlerAiCheckInstructionSignature = new List<Instruction> {
+                new Instruction(OpCodes.Brfalse, null),
+                new Instruction(OpCodes.Ldarg_0),
+                new Instruction(OpCodes.Ldfld, healthHandlerControllerFieldDef),
+                new Instruction(OpCodes.Ldfld, controllerIsAiFieldDef),
+                new Instruction(OpCodes.Brfalse, null)
+            };
+
+            var matchedHealthHandlerDieMethodInstructions = InjectionHelpers.FetchInstructionsBySignature(healthHandlerDieMethodDef.Body.Instructions, healthHandlerAiCheckInstructionSignature, false);
+
+            if (matchedHealthHandlerDieMethodInstructions != null)
+            {
+                var branchInstruction = matchedHealthHandlerDieMethodInstructions.Last();
+                var injectionIndex = healthHandlerDieMethodDef.Body.Instructions.IndexOf(branchInstruction) + 1;
+
+                // Add check for a valid playerID when checking that the controller is an AI
+                var healtHandlerAiCheckInstructionsToInject = new List<Instruction>
+                {
+                    new Instruction(OpCodes.Ldarg_0),
+                    new Instruction(OpCodes.Ldfld, healthHandlerControllerFieldDef),
+                    new Instruction(OpCodes.Ldfld, controllerPlayerIdFieldDef),
+                    new Instruction(OpCodes.Ldc_I4_M1),
+                    new Instruction(OpCodes.Bgt_S, branchInstruction.Operand),
+                };
+
+                // Add new instructions after the matched signature
+                for (var i = 0; i < healtHandlerAiCheckInstructionsToInject.Count; i++)
+                {
+                    healthHandlerDieMethodDef.Body.Instructions.Insert(injectionIndex + i, healtHandlerAiCheckInstructionsToInject[i]);
+                }
+
+                healthHandlerDieMethodDef.Body.UpdateInstructionOffsets();
+            }
+            else
+            {
+                await _logger.Log("Apply bot death fix: Health handler die method signature does not match any instructions", LogLevel.Error);
+            }
+        }
+
         private async Task EnableFlyingModeWeaponPickup()
         {
             var bodyPartTypeDef = _targetModule.Find("BodyPart", true);
@@ -771,11 +843,11 @@ namespace StickFightTheGameTrainer.Trainer
 
             var bodyPartControllerFieldDef = bodyPartTypeDef.FindField("controller");
 
-            var instructionSignature = new List<Instruction> { 
-                new Instruction(OpCodes.Ldfld, bodyPartControllerFieldDef), 
-                new Instruction(OpCodes.Ldfld, canFlyFieldDef), 
-                new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_1, null)), 
-                new Instruction(OpCodes.Ldarg_0, null) 
+            var instructionSignature = new List<Instruction> {
+                new Instruction(OpCodes.Ldfld, bodyPartControllerFieldDef),
+                new Instruction(OpCodes.Ldfld, canFlyFieldDef),
+                new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_1, null)),
+                new Instruction(OpCodes.Ldarg_0, null)
             };
 
             var matchedInstructions = InjectionHelpers.FetchInstructionsBySignature(onCollisionEnterMethod.Body.Instructions, instructionSignature, false);
@@ -798,10 +870,10 @@ namespace StickFightTheGameTrainer.Trainer
             var onCollisionEnterMethod = controllerTypeDef.FindMethod("Update");
             var canFlyFieldDef = controllerTypeDef.FindField("canFly");
 
-            var instructionSignature = new List<Instruction> { 
-                new Instruction(OpCodes.Ldfld, canFlyFieldDef), 
-                new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_0, null)), 
-                new Instruction(OpCodes.Ldarg_0, null) 
+            var instructionSignature = new List<Instruction> {
+                new Instruction(OpCodes.Ldfld, canFlyFieldDef),
+                new Instruction(OpCodes.Brtrue, new Instruction(OpCodes.Ldarg_0, null)),
+                new Instruction(OpCodes.Ldarg_0, null)
             };
 
             var matchedInstructions = InjectionHelpers.FetchInstructionsBySignature(onCollisionEnterMethod.Body.Instructions, instructionSignature, false);
@@ -932,13 +1004,13 @@ namespace StickFightTheGameTrainer.Trainer
 
             return singletonSucceeded && trainerOptionsSucceeded && trainerManagerSucceeded;
         }
-        
+
         private bool InjectCustomAILogic()
         {
             var sourceModuleAiTypeDef = _targetModule.Find("AI", false);
             var destinationAiTypeDef = _logicModule.Find("AILogic", false);
 
-            if(sourceModuleAiTypeDef == null || destinationAiTypeDef == null)
+            if (sourceModuleAiTypeDef == null || destinationAiTypeDef == null)
             {
                 return false;
             }
