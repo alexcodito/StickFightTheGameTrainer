@@ -5,7 +5,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using StickFightTheGameTrainer.Trainer.TrainerLogic;
 
 namespace StickFightTheGameTrainer.Trainer
 {
@@ -140,17 +139,30 @@ namespace StickFightTheGameTrainer.Trainer
 
             var versionParsed = double.TryParse(version, out var dVersion);
 
-            // Uncomment matching lines of code depending on the parsed target game version.
+            // Define version specific versions for compatibility if the module requires it.
+            if (versionParsed && decryptedModule.IndexOf("REQUIRE_COMPATIBILITY_PATCHING") > -1)
+            {
+                if (dVersion >= 1.8)
+                {
+                    // Versions higher than 1.7
+                    decryptedModule = decryptedModule.Insert(0, $"#define V1_8_POST{Environment.NewLine}");
+                }
+                else
+                {
+                    // Versions lower than 1.8
+                    decryptedModule = decryptedModule.Insert(0, $"#define V1_8_PRE{Environment.NewLine}");
+                }
 
-            // SpawnRandomWeapon method takes 3 arguments since version 1.2.08 (1.8) 
-            if (versionParsed && dVersion < 1.8)
-            {
-                decryptedModule = decryptedModule.Replace("//{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}", "");
-            }
-            else
-            {
-                decryptedModule = decryptedModule.Replace("//{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}", "");
-            }
+                if (dVersion >= 24.0)
+                {
+                    // Versions higher than 23
+                    decryptedModule = decryptedModule.Insert(0, $"#define V24_POST{Environment.NewLine}");
+                } else
+                {
+                    // Versions lower than 24
+                    decryptedModule = decryptedModule.Insert(0, $"#define V24_PRE{Environment.NewLine}");
+                }
+            }            
 
             return decryptedModule;
         }

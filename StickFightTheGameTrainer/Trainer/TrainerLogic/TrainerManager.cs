@@ -1,3 +1,5 @@
+#define REQUIRE_COMPATIBILITY_PATCHING
+
 using System;
 using System.IO;
 using System.Text;
@@ -484,7 +486,13 @@ public class TrainerManager : MonoBehaviour
         //
 
         MultiplayerManager.mGameManager.controllerHandler.players.Add(playerController);
+#if V24_PRE
         MultiplayerManager.mGameManager.RevivePlayer(playerController);
+#endif
+
+#if V24_POST
+        MultiplayerManager.mGameManager.RevivePlayer(playerController, true);
+#endif
     }
 
     private void SpawnBotEnemyPlayer()
@@ -522,15 +530,13 @@ public class TrainerManager : MonoBehaviour
         // Delegate spawning of the weapon to the network manager
         if (MatchmakingHandler.IsNetworkMatch)
         {
-            // Updates to the game often result in changes to method signatures (e.g. additional parameters).
-            // TrainerLogicModuleBuilder will uncomment the appropriate lines depending on the target version of the game.
+#if V1_8_PRE
+        GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
+#endif
 
-            // Pre v1.2.08
-            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Pre1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector);
-
-            // Post v1.2.08
-            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, spawnAsPresent);
-
+#if V1_8_POST
+        GetComponent<GameManager>().mNetworkManager.SpawnWeapon(randomWeaponIndex, vector, spawnAsPresent);
+#endif
             return;
         }
 
@@ -539,11 +545,9 @@ public class TrainerManager : MonoBehaviour
 
         if (spawnAsPresent)
         {
-            // Updates to the game often result in changes to method signatures (e.g. additional parameters).
-            // TrainerLogicModuleBuilder will uncomment the appropriate lines depending on the target version of the game.
-
-            // Post v1.2.08
-            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}instantiatedWeapon.GetComponent<WeaponPickUp>().ChangeToPresent();
+#if V1_8_POST
+        instantiatedWeapon.GetComponent<WeaponPickUp>().ChangeToPresent();
+#endif
         }
 
         GetComponent<GameManager>().mSpawnedWeapons.Add(instantiatedWeapon.GetComponent<Rigidbody>());
