@@ -203,14 +203,15 @@ public class AILogic : AI
                 return;
             }
 
+            // Find a PC / player to attack
             foreach (var playerController in controllerHandler.players)
             {
                 if (playerController != null)
                 {
                     var playerCharacterInformation = playerController.GetComponent<CharacterInformation>();
 
-                    // Set target if it is an NPC or a PC that isn't the itself, and if it is not dead.
-                    if ((playerController.playerID < 0 || playerController.playerID != this.controller.playerID) && !playerCharacterInformation.isDead)
+                    // Set target that is not itself and not dead.
+                    if (playerController != this.controller && !playerCharacterInformation.isDead)
                     {
                         var torsoTransform = playerController.GetComponentInChildren<Torso>().transform;
                         var targetDistance = Vector3.Distance(head.position, torsoTransform.position);
@@ -224,6 +225,32 @@ public class AILogic : AI
                     }
                 }
             }
+
+            // Find an NPC to attack
+            // Todo: The choice between attempting to first target a Player/PC or NPC could be randomized.
+            // Todo: The below works, however the NPCs need to be on different GameObject layers for them to be able to collide (refer to Controller.SetCollision)
+
+            //if (this.target == null)
+            //{
+            //    foreach (var characterAlive in MultiplayerManager.mGameManager.hoardHandler.charactersAlive)
+            //    {
+            //        if (characterAlive != null && characterAlive != this.controller)
+            //        {
+            //            var characterInformation = characterAlive.GetComponent<CharacterInformation>();
+            //            if (!characterInformation.isDead)
+            //            {
+            //                var torsoTransform = characterAlive.GetComponentInChildren<Torso>().transform;
+            //                var targetDistance = Vector3.Distance(this.head.position, torsoTransform.position);
+            //                if (targetDistance < closestTargetDistance)
+            //                {
+            //                    closestTargetDistance = targetDistance;
+            //                    this.target = torsoTransform.GetComponent<Rigidbody>();
+            //                    this.targetInformation = characterInformation;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
     }
 }
