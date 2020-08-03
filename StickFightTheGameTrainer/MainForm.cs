@@ -128,6 +128,9 @@ namespace StickFightTheGameTrainer
 
         private async void TxtGamePath_TextChanged(object sender, EventArgs e)
         {
+            // Strip double quotes
+            txtGamePath.Text = txtGamePath.Text.Replace("\"", "");
+
             BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(txtGamePath.Text);
         }
 
