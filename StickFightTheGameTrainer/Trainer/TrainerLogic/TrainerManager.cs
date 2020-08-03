@@ -281,7 +281,7 @@ public class TrainerManager : MonoBehaviour
                 if (MatchmakingHandler.IsNetworkMatch)
                 {
                     // Delegate to the multiplayer game manager
-                    MapWrapper nextLevel = MultiplayerManager.mGameManager.levelSelector.GetNextLevel();
+                    var nextLevel = MultiplayerManager.mGameManager.levelSelector.GetNextLevel();
                     ChangeMap(nextLevel, 0);
                     return;
                 }
@@ -484,7 +484,7 @@ public class TrainerManager : MonoBehaviour
         //
 
         MultiplayerManager.mGameManager.controllerHandler.players.Add(playerController);
-        MultiplayerManager.mGameManager.RevivePlayer(playerController, true);
+        MultiplayerManager.mGameManager.RevivePlayer(playerController);
     }
 
     private void SpawnBotEnemyPlayer()
@@ -522,7 +522,7 @@ public class TrainerManager : MonoBehaviour
         // Delegate spawning of the weapon to the network manager
         if (MatchmakingHandler.IsNetworkMatch)
         {
-            // Updates to the game may result in changes to method signatures (e.g. additional parameters).
+            // Updates to the game often result in changes to method signatures (e.g. additional parameters).
             // TrainerLogicModuleBuilder will uncomment the appropriate lines depending on the target version of the game.
 
             // Pre v1.2.08
@@ -539,7 +539,11 @@ public class TrainerManager : MonoBehaviour
 
         if (spawnAsPresent)
         {
-            instantiatedWeapon.GetComponent<WeaponPickUp>().ChangeToPresent();
+            // Updates to the game often result in changes to method signatures (e.g. additional parameters).
+            // TrainerLogicModuleBuilder will uncomment the appropriate lines depending on the target version of the game.
+
+            // Post v1.2.08
+            //{TrainerCompatibility.TrainerManager.SpawnRandomWeapon.Post1_2_08_arg_1}instantiatedWeapon.GetComponent<WeaponPickUp>().ChangeToPresent();
         }
 
         GetComponent<GameManager>().mSpawnedWeapons.Add(instantiatedWeapon.GetComponent<Rigidbody>());
