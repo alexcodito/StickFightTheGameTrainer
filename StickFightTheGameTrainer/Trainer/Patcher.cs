@@ -122,17 +122,19 @@ namespace StickFightTheGameTrainer.Trainer
             await _trainerLogicModuleBuilder.EncryptLogicModuleSource();
         }
 
-        public async Task<bool> CheckTrainerAlreadyPatched(ModuleDefMD module = null)
+        public async Task<bool> CheckTrainerAlreadyPatched()
         {
-            if (module == null)
-            {
-                module = _targetModule;
-            }
+            var stickFightConstantsTypeDef = _targetModule.Find("StickFightConstants", false);
 
-            // Check if trainer code already exists in the target module.
-            if (module.Find("TrainerManager", true) != null)
+            // Check if patch indicator exists in the target module.
+            if (stickFightConstantsTypeDef != null)
             {
-                return await Task.FromResult(true);
+                var trainerPatchIndicator = stickFightConstantsTypeDef.FindField("LoxaTrainerPatch");
+
+                if(trainerPatchIndicator != null)
+                {
+                    return await Task.FromResult(true);
+                }
             }
 
             return await Task.FromResult(false);
@@ -151,7 +153,7 @@ namespace StickFightTheGameTrainer.Trainer
 
                 _targetModule.Dispose();
 
-                File.Copy(_targetModulePath, _targetModulePath.Replace(".dll", $"_{targetGameVersion}_{DateTime.Now.ToString("s").Replace(":", "")}_backup.dll"));
+                File.Copy(_targetModulePath, _targetModulePath.Replace(".dll", $"_{targetGameVersion}_{Application.ProductVersion}_{DateTime.Now.ToFileTime()}_backup.dll"));
 
                 _targetModule = ModuleDefMD.Load(_targetModulePath);
             }
@@ -206,7 +208,12 @@ namespace StickFightTheGameTrainer.Trainer
 
             var targetGameVersion = $"{await GetGameVersion()}";
 
-            var matches = Directory.GetFiles(directory, $"Assembly-CSharp_{targetGameVersion}*_backup.dll");
+            if (string.IsNullOrWhiteSpace(targetGameVersion))
+            {
+                targetGameVersion = "*";
+            }
+
+            var matches = Directory.GetFiles(directory, $"Assembly-CSharp_{targetGameVersion}_{Application.ProductVersion}_*_backup.dll");
 
             if (!matches.Any())
             {
@@ -257,6 +264,10 @@ namespace StickFightTheGameTrainer.Trainer
 
             var patcherVersion = $"Patcher version: {Application.ProductVersion}";
             await _logger.Log(patcherVersion);
+
+            // Add a private field indicating that the module has been modified.
+            AddTrainerPatchIndicator();
+            SaveAndReload();
 
             // Set target fields and methods as public in order to allow TrainerLogic.dll's code to reference them and compile.
             // Note: While it would have been convenient to simply set *every* field and method as public/internal, it causes in-game glitches (e.g. ambiguous references and null reference exceptions)
@@ -375,6 +386,12 @@ namespace StickFightTheGameTrainer.Trainer
             await _logger.Log("Patching completed");
 
             return await Task.FromResult(true);
+        }
+
+        private void AddTrainerPatchIndicator()
+        {
+            var stickFightConstantsTypeDef = _targetModule.Find("StickFightConstants", false);
+            stickFightConstantsTypeDef.Fields.Add(new FieldDefUser("LoxaTrainerPatch", new FieldSig(_targetModule.CorLibTypes.Boolean), FieldAttributes.Private));
         }
 
         private async Task AddTrainerManagerToGameManager()
@@ -929,8 +946,6 @@ namespace StickFightTheGameTrainer.Trainer
 
             // Create method ref users
             var getComponentMethodRefUser = new MemberRefUser(_targetModule, "GetComponent", MethodSig.CreateInstanceGeneric(1, new GenericMVar(0, aiStartMethodDef)), unityEngineComponentTypeRefUser);
-            //var getComponentMethodRefUser = new MemberRefUser(_targetModule, "GetComponent", MethodSig.CreateInstanceGeneric(1, aiTypeDef.ToTypeSig()), unityEngineComponentTypeRefUser);
-            //var getComponentMethodRefUser = new MemberRefUser(_targetModule, "GetComponent", MethodSig.CreateInstanceGeneric(1, new GenericVar(0, aiTypeDef)), unityEngineComponentTypeRefUser);
             var setEnabledMethodRefUser = new MemberRefUser(_targetModule, "set_enabled", MethodSig.CreateInstance(_targetModule.CorLibTypes.Void, _targetModule.CorLibTypes.Boolean), unityEngineBehaviourTypeRefUser);
 
             // Create method spec users

@@ -2,6 +2,7 @@
 using StickFightTheGameTrainer.Reference;
 using StickFightTheGameTrainer.Trainer;
 using System;
+using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -46,7 +47,9 @@ namespace StickFightTheGameTrainer
             _logger.ClearLogs();
             _errorReportingForm.Hide();
 
-            if (await _patcher.LoadTargetModule(txtGamePath.Text))
+            var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
+
+            if (await _patcher.LoadTargetModule(targetPath))
             {
                 if (await _patcher.CheckTrainerAlreadyPatched())
                 {
@@ -63,7 +66,7 @@ namespace StickFightTheGameTrainer
                 }
                 else
                 {
-                    BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(txtGamePath.Text);
+                    BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
                     MessageBox.Show("The patch has been successfully installed");
                 }
 
@@ -77,7 +80,14 @@ namespace StickFightTheGameTrainer
 
         private async void BtnBrowseGamePath_Click(object sender, EventArgs e)
         {
-            browseGamePathDialog.SelectedPath = Path.GetDirectoryName(txtGamePath.Text);
+            if (CheckValidPath(txtGamePath.Text)) {
+                var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
+                browseGamePathDialog.SelectedPath = Path.GetDirectoryName(targetPath);
+            } 
+            else
+            {
+                browseGamePathDialog.SelectedPath = Directory.GetLogicalDrives()[0];
+            }
 
             var dialogResult = browseGamePathDialog.ShowDialog();
 
@@ -116,7 +126,9 @@ namespace StickFightTheGameTrainer
 
         private async void BtnRestoreBackup_Click(object sender, EventArgs e)
         {
-            if (!await _patcher.RestoreLatestBackup(txtGamePath.Text))
+            var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
+
+            if (!await _patcher.RestoreLatestBackup(targetPath))
             {
                 MessageBox.Show("Could not restore latest backup!");
             }
@@ -127,11 +139,21 @@ namespace StickFightTheGameTrainer
         }
 
         private async void TxtGamePath_TextChanged(object sender, EventArgs e)
-        {
+        {            
             // Strip double quotes
             txtGamePath.Text = txtGamePath.Text.Replace("\"", "");
 
-            BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(txtGamePath.Text);
+            if (CheckValidPath(txtGamePath.Text) == false)
+            {
+                btnInstallMod.Enabled = false;
+                BtnRestoreBackup.Enabled = false;
+                return;
+            }
+
+            var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
+            
+            btnInstallMod.Enabled = File.Exists(targetPath);
+            BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
         }
 
         private async void GenerateEncryptedSourcesAndKeysToolStripMenuItem_ClickAsync(object sender, EventArgs e)
@@ -144,6 +166,66 @@ namespace StickFightTheGameTrainer
             {
                 MessageBox.Show($"Could not encrypy logic module source: {ex.Message}{Environment.NewLine}{ex.InnerException}{Environment.NewLine}{ex.StackTrace}");
             }
+        }
+
+        private bool CheckValidPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return false;
+            }
+
+            // Check valid directory
+            var invalidPathChars = Path.GetInvalidPathChars();
+            var invalidFileNameChars = Path.GetInvalidFileNameChars();
+            if (path.Any(t => invalidPathChars.Contains(t)))
+            {
+                return false;
+            }
+
+            var directory = Path.GetDirectoryName(path);
+
+            // Check directory exists
+            if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
+            {
+                return false;
+            }
+
+            // Check valid filename
+            var fileName = Path.GetFileName(path);
+            if (string.IsNullOrEmpty(fileName) == false && fileName.Any(t => invalidFileNameChars.Contains(t)))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private string GetAdjustedTargetFilePath(string targetPath)
+        {
+            var targetFileName = Path.GetFileName(targetPath);
+            var targetFileNameExtension = Path.GetExtension(targetPath);
+            var targetFileNameWithoutExtension = Path.GetFileNameWithoutExtension(targetPath);
+
+            var directory = Path.GetDirectoryName(targetPath);
+
+            if (string.IsNullOrEmpty(directory))
+            {
+                targetPath = Path.Combine(".\\", targetPath);
+            }
+
+            if (string.IsNullOrEmpty(targetFileName))
+            {
+                // Append file name if only a directory is supplied
+                targetPath = Path.Combine(targetPath, "Assembly-CSharp.dll");
+            }
+            else if (string.IsNullOrEmpty(targetFileNameExtension) && string.IsNullOrEmpty(targetFileNameWithoutExtension) == false)
+            {
+                // Append extension if only the file name is supplied
+                targetPath += ".dll";
+            }
+
+            return targetPath;
         }
 
         private void btnDeveloperOptions_Click(object sender, EventArgs e)
