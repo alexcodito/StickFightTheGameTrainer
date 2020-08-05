@@ -73,47 +73,64 @@ public class TrainerManager : MonoBehaviour
     public void OnGUI()
     {
 #if DEBUG
-        DisplayUnityLogs(430f, 25f, 390f, 380f);
+        DisplayUnityLogs(460f, 25f, 420f, 455f);
 #endif
         if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
-            // Draw menu container and title
-            GUI.Box(new Rect(25f, 25f, 390f, 380f), "");
-            GUI.Label(new Rect(35f, 30f, 280f, 25f), "<color=silver><b>Stick Fight The Game</b></color>");
-            GUI.Label(new Rect(35f, 50f, 425f, 25f), "<color=silver><b>+12 Trainer v{Application.ProductVersion} - Made by loxa</b></color>");
+            var containerWidth = 420f;
+            var containerHeight = 455f;
 
-            // Calculate frame-rate
-            string msFps;
-            if (Singleton<TrainerOptions>.Instance.DisplayFps)
+            var containerStyle = new GUIStyle(GUI.skin.box)
             {
-                float num = this._deltaTime * 1000f;
-                float num2 = 1f / this._deltaTime;
-                msFps = string.Format(" {0:0.0} ms ({1:0} fps)", num, num2);
-            }
-            else
-            {
-                msFps = " -:-:- ms (-:- fps)";
-            }
+                padding = new RectOffset(10, 10, 10, 5)
+            };
 
-            // Display frame-rate
-            if (GUI.Toggle(new Rect(290f, 30f, 120f, 25f), Singleton<TrainerOptions>.Instance.DisplayFps, "<color=maroon><b>" + msFps + "</b></color>") != Singleton<TrainerOptions>.Instance.DisplayFps)
+            var horizontalGroupStyle = new GUIStyle(GUI.skin.box)
             {
-                Singleton<TrainerOptions>.Instance.DisplayFps = !Singleton<TrainerOptions>.Instance.DisplayFps;
-            }
+                padding = new RectOffset(5, 5, 0, 0),
+                fixedHeight = 25f
+            };
 
-            GUI.Label(new Rect(35f, 80f, 400f, 90f), "<color=grey><b>Toggle Options</b></color>");
+            var toggleStyle = new GUIStyle(GUI.skin.toggle)
+            {
+                margin = new RectOffset(0, 0, 2, 0),
+                padding = new RectOffset(15, 0, 3, 2)
+            };
+
+            var buttonStyle = new GUIStyle(GUI.skin.button)
+            {
+                padding = new RectOffset(5, 5, 5, 5)
+            };
+
+            // Calculate / format frame-rate
+            var deltaTimeMs = this._deltaTime * 1000f;
+            var fps = 1f / this._deltaTime;
+            var formattedMsFps = string.Format(" {0:0.0} ms ({1:0} fps)", deltaTimeMs, fps);
+
+            GUILayout.BeginArea(new Rect(25f, 25f, containerWidth, containerHeight), containerStyle);
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("<color=silver><b>Stick Fight The Game</b></color>", new GUIStyle { alignment = TextAnchor.MiddleLeft });
+            GUILayout.Label("<color=maroon><b>" + formattedMsFps + "</b></color>", new GUIStyle { alignment = TextAnchor.MiddleRight });
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("<color=silver><b>+12 Trainer v{Application.ProductVersion} - Made by loxa</b></color>");
+            GUILayout.Space(5);
+            GUILayout.Label("<color=grey><b>Toggle Options</b></color>");
+
+            GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical();
 
             // Toggle between 'Online (no-cheats)' and 'Online Friends (cheats)' mode
-            if (GUI.Toggle(new Rect(35f, 100f, 100f, 25f), Singleton<TrainerOptions>.Instance.TrainerActive, !Singleton<TrainerOptions>.Instance.TrainerActive
-                    ? "<color=green> Online Mode</color>"
-                    : "<color=green> Friends Mode</color>") != Singleton<TrainerOptions>.Instance.TrainerActive)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.TrainerActive, "<color=green> " + (Singleton<TrainerOptions>.Instance.TrainerActive ? "Friends Mode" : "Online Mode") + "</color>", GUILayout.Width(140)) != Singleton<TrainerOptions>.Instance.TrainerActive)
             {
                 // Announce restart due to online mode change
                 MultiplayerManager.mGameManager.winText.fontSize = 140f;
                 MultiplayerManager.mGameManager.winText.color = Color.white;
                 MultiplayerManager.mGameManager.winText.text = (!Singleton<TrainerOptions>.Instance.TrainerActive
-                    ? "ONLINE (FRIENDS) - CHEATS ENABLED\r\nRestarting in 2 seconds..."
-                    : "ONLINE - CHEATS DISABLED\r\nRestarting in 2 seconds...");
+                    ? "ONLINE (FRIENDS ONLY) - CHEATS ENABLED\r\nRestarting in 2 seconds..."
+                    : "ONLINE (PUBLIC) - CHEATS DISABLED\r\nRestarting in 2 seconds...");
 
                 MultiplayerManager.mGameManager.winText.gameObject.SetActive(true);
 
@@ -128,119 +145,154 @@ public class TrainerManager : MonoBehaviour
                 MatchmakingHandler.SetNewLobbyType(ELobbyType.k_ELobbyTypePrivate);
             }
 
-            // Toggle display of health bars
-            if (GUI.Toggle(new Rect(35f, 120f, 100f, 25f), Singleton<TrainerOptions>.Instance.DisplayHealthBars, " Health Bars") != Singleton<TrainerOptions>.Instance.DisplayHealthBars)
-            {
-                Singleton<TrainerOptions>.Instance.DisplayHealthBars = !Singleton<TrainerOptions>.Instance.DisplayHealthBars;
-            }
-
-            // Toggle display of scoreboard
-            if (GUI.Toggle(new Rect(35f, 140f, 100f, 25f), Singleton<TrainerOptions>.Instance.DisplayScore, " Scoreboard") != Singleton<TrainerOptions>.Instance.DisplayScore)
-            {
-                Singleton<TrainerOptions>.Instance.DisplayScore = !Singleton<TrainerOptions>.Instance.DisplayScore;
-            }
-
             // Toggle flying mode for all players
-            if (GUI.Toggle(new Rect(140f, 100f, 100f, 25f), Singleton<TrainerOptions>.Instance.FlightMode, " Flying Mode") != Singleton<TrainerOptions>.Instance.FlightMode)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.FlightMode, " Flying Mode", GUILayout.Width(140)) != Singleton<TrainerOptions>.Instance.FlightMode)
             {
                 Singleton<TrainerOptions>.Instance.FlightMode = !Singleton<TrainerOptions>.Instance.FlightMode;
                 ToggleFlyingMode();
             }
 
-            // Toggle unlimited ammunition
-            if (GUI.Toggle(new Rect(240f, 120f, 130f, 25f), Singleton<TrainerOptions>.Instance.UnlimitedAmmo, " Unlimited Ammo") != Singleton<TrainerOptions>.Instance.UnlimitedAmmo)
-            {
-                Singleton<TrainerOptions>.Instance.UnlimitedAmmo = !Singleton<TrainerOptions>.Instance.UnlimitedAmmo;
-                ToggleUnlimitedAmmo();
-            }
-
             // Toggle uncapped fire-rate
-            if (GUI.Toggle(new Rect(240f, 100f, 130f, 25f), Singleton<TrainerOptions>.Instance.UncappedFirerate, " Uncapped Fire-rate") != Singleton<TrainerOptions>.Instance.UncappedFirerate)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.UncappedFirerate, " Uncapped Fire-rate", GUILayout.Width(140)) != Singleton<TrainerOptions>.Instance.UncappedFirerate)
             {
                 Singleton<TrainerOptions>.Instance.UncappedFirerate = !Singleton<TrainerOptions>.Instance.UncappedFirerate;
                 ToggleUncappedFirerate();
             }
 
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical();
+
+            // Toggle display of health bars
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.DisplayHealthBars, " Health Bars", GUILayout.Width(130)) != Singleton<TrainerOptions>.Instance.DisplayHealthBars)
+            {
+                Singleton<TrainerOptions>.Instance.DisplayHealthBars = !Singleton<TrainerOptions>.Instance.DisplayHealthBars;
+            }
+
             // Toggle full automatic weapons
-            if (GUI.Toggle(new Rect(140f, 120f, 90f, 25f), Singleton<TrainerOptions>.Instance.FullAuto, " Full Auto") != Singleton<TrainerOptions>.Instance.FullAuto)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.FullAuto, " Full Auto", GUILayout.Width(130)) != Singleton<TrainerOptions>.Instance.FullAuto)
             {
                 Singleton<TrainerOptions>.Instance.FullAuto = !Singleton<TrainerOptions>.Instance.FullAuto;
                 ToggleFullAuto();
             }
 
-            // Toggle unlimited health
-            if (GUI.Toggle(new Rect(240f, 140f, 150f, 25f), Singleton<TrainerOptions>.Instance.UnlimitedHealth, " Unlimited Health") != Singleton<TrainerOptions>.Instance.UnlimitedHealth)
+            // Toggle unlimited ammunition
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.UnlimitedAmmo, " Unlimited Ammo", GUILayout.Width(130)) != Singleton<TrainerOptions>.Instance.UnlimitedAmmo)
             {
-                 Singleton<TrainerOptions>.Instance.UnlimitedHealth = !Singleton<TrainerOptions>.Instance.UnlimitedHealth;
-                // Handled in the patched TakeDamage method
+                Singleton<TrainerOptions>.Instance.UnlimitedAmmo = !Singleton<TrainerOptions>.Instance.UnlimitedAmmo;
+                ToggleUnlimitedAmmo();
+            }
+
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical();
+
+            // Toggle display of scoreboard
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.DisplayScore, " Scoreboard", GUILayout.Width(150)) != Singleton<TrainerOptions>.Instance.DisplayScore)
+            {
+                Singleton<TrainerOptions>.Instance.DisplayScore = !Singleton<TrainerOptions>.Instance.DisplayScore;
             }
 
             // Toggle no recoil
-            if (GUI.Toggle(new Rect(140f, 140f, 90f, 25f), Singleton<TrainerOptions>.Instance.NoRecoil, " No Recoil") != Singleton<TrainerOptions>.Instance.NoRecoil)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.NoRecoil, " No Recoil", GUILayout.Width(150)) != Singleton<TrainerOptions>.Instance.NoRecoil)
             {
                 Singleton<TrainerOptions>.Instance.NoRecoil = !Singleton<TrainerOptions>.Instance.NoRecoil;
                 ToggleNoRecoil();
             }
 
-            GUI.Label(new Rect(35f, 170f, 400f, 90f), "<color=grey><b>Spawn NPCs / Bots</b></color>");
+            // Toggle unlimited health
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.UnlimitedHealth, " Unlimited Health", GUILayout.Width(150)) != Singleton<TrainerOptions>.Instance.UnlimitedHealth)
+            {
+                // Handled in the patched TakeDamage method
+                Singleton<TrainerOptions>.Instance.UnlimitedHealth = !Singleton<TrainerOptions>.Instance.UnlimitedHealth;
+            }
 
-            if (GUI.Button(new Rect(35f, 190f, 75f, 25f), "Dummy"))
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.Space(10);
+
+            GUILayout.Label("<color=grey><b>Spawn Bots</b></color>");
+
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(horizontalGroupStyle, GUILayout.Width(100));
+            Singleton<TrainerOptions>.Instance.SpawnPcEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnPcEnabled, " PC", toggleStyle, GUILayout.Width(50));
+            Singleton<TrainerOptions>.Instance.SpawnNpcEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnNpcEnabled, " NPC", toggleStyle, GUILayout.Width(50));
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal(horizontalGroupStyle, GUILayout.Width(170));
+            Singleton<TrainerOptions>.Instance.AiAggressiveEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiAggressiveEnabled, " Aggressive", toggleStyle, GUILayout.Width(95));
+            Singleton<TrainerOptions>.Instance.AiNormalEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiNormalEnabled, " Normal", toggleStyle, GUILayout.Width(60));
+            GUILayout.EndHorizontal();
+            GUILayout.EndHorizontal();
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal();
+
+            if (GUILayout.Button("Player", buttonStyle, GUILayout.Width(75)))
             {
                 SpawnBotDummy();
             }
 
-            if (GUI.Button(new Rect(120f, 190f, 75f, 25f), "Enemy"))
+            if (GUILayout.Button("Agent", buttonStyle, GUILayout.Width(75)))
             {
                 SpawnBotEnemyPlayer();
             }
 
-            if (GUI.Button(new Rect(205f, 190f, 75f, 25f), "Zombie"))
+            if (GUILayout.Button("Zombie", buttonStyle, GUILayout.Width(75)))
             {
                 SpawnBotEnemyZombie();
             }
 
-            if (GUI.Button(new Rect(290f, 190f, 75f, 25f), "Brat"))
+            if (GUILayout.Button("Bolt", buttonStyle, GUILayout.Width(75)))
             {
                 SpawnBotEnemyBrat();
             }
 
-            // Display available shortcuts
-            GUI.Label(new Rect(35f, 230f, 400f, 90f), "<color=grey><b>PC Keyboard Shortcuts</b></color>\r\n" +
-                                                      "- Toggle Menu:\t[SHIFT] + [M]\r\n" +
-                                                      "- Skip Map:\t[SHIFT] + [S]\r\n" +
-                                                      "- Spawn Weapon:\t[R] or [P]\r\n" +
-                                                      "- Browse Weapons:\t[Q] for previous or [E] for next");
+            GUILayout.EndHorizontal();
 
-            GUI.Label(new Rect(35f, 320f, 500f, 90f), "<color=grey><b>Xbox 360 Controller Shortcuts</b></color>\r\n" +
-                                                      "- Toggle Menu:\t[RB] + [A]\r\n" +
-                                                      "- Skip Map:\t[RB] + [B]\r\n" +
-                                                      "- Spawn Weapon:\t[DPadUp] or [DPadDown]\r\n" +
-                                                      "- Browse Weapons:\t[DPadLeft] or [DPadRight]");
+            // Display available shortcuts
+
+            GUILayout.Space(10);
+            GUILayout.Label("<color=grey><b>PC Keyboard Shortcuts</b></color>");
+            GUILayout.Label("- Toggle Menu:\t[SHIFT] + [M]\r\n" +
+                            "- Skip Map:\t[SHIFT] + [S]\r\n" +
+                            "- Spawn Weapon:\t[R] or [P]\r\n" +
+                            "- Browse Weapons:\t[Q] for previous or [E] for next");
+
+            GUILayout.Space(5);
+            GUILayout.Label("<color=grey><b>Xbox 360 Controller Shortcuts</b></color>");
+            GUILayout.Label("- Toggle Menu:\t[RB] + [A]\r\n" +
+                            "- Skip Map:\t[RB] + [B]\r\n" +
+                            "- Spawn Weapon:\t[DPadUp] or [DPadDown]\r\n" +
+                            "- Browse Weapons:\t[DPadLeft] or [DPadRight]");
+
+            GUILayout.EndArea();
         }
 
         if (Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             // Display healthbars and scores for all players
-            foreach (Controller controller2 in MultiplayerManager.mGameManager.controllerHandler.players)
+            foreach (var player in MultiplayerManager.mGameManager.controllerHandler.players)
             {
-                if (controller2.fighting != null)
+                if (player.fighting != null)
                 {
                     if (Singleton<TrainerOptions>.Instance.DisplayHealthBars)
                     {
                         var health = 0f;
-                        var healthHandler = controller2.fighting.GetComponent<HealthHandler>();
+                        var healthHandler = player.fighting.GetComponent<HealthHandler>();
                         if (healthHandler != null)
                         {
-                            health = controller2.fighting.GetComponent<HealthHandler>().health;
+                            health = player.fighting.GetComponent<HealthHandler>().health;
                         }
 
-                        EditorGUITools.DrawRect(new Rect(Screen.width - 125, 30f * controller2.playerID + 10f, Math.Max(0f, health), 20f), GetPlayerColorByIndex(controller2.playerID), null);
-                        GUI.Label(new Rect(Screen.width - 160, 30f * controller2.playerID + 10f, 250f, 25f), Math.Max(0.0, Math.Round(health)).ToString());
+                        EditorGUITools.DrawRect(new Rect(Screen.width - 125, 30f * player.playerID + 10f, Math.Max(0f, health), 20f), GetPlayerColorByIndex(player.playerID), null);
+                        GUI.Label(new Rect(Screen.width - 160, 30f * player.playerID + 10f, 250f, 25f), Math.Max(0.0, Math.Round(health)).ToString());
                     }
 
-                    if (Singleton<TrainerOptions>.Instance.DisplayScore && controller2.fighting.stats != null)
+                    if (Singleton<TrainerOptions>.Instance.DisplayScore && player.fighting.stats != null)
                     {
-                        GUI.Label(new Rect(Screen.width - 180, 30f * (float)controller2.playerID + 10f, 250f, 25f), "<b>" + controller2.fighting.stats.wins.ToString() + "</b>");
+                        GUI.Label(new Rect(Screen.width - 180, 30f * (float)player.playerID + 10f, 250f, 25f), "<b>" + player.fighting.stats.wins.ToString() + "</b>");
                     }
                 }
             }
