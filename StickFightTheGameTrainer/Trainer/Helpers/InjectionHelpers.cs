@@ -46,8 +46,8 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
                     return true;
                 }
 
-                    moduleDefMdTarget.Types.Remove(existingTypeDef);
-                }
+                moduleDefMdTarget.Types.Remove(existingTypeDef);
+            }
 
             // Detach from associated module before injecting into target
             if (detachFromSourceModuleTypes)
@@ -312,6 +312,33 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             }
         }
 
+        /// <summary>
+        /// Wrap a try/catch block around the entire body of a method.
+        /// </summary>
+        /// <param name="body">Target method CilBody that will be wrapped with a try/catch block</param>
+        /// <param name="catchHandler">Optional collection of instructions to place in the exception handler.</param>
+        /// <param name="catchType">Optional type of exception (defaults to System.Object)</param>
+        public static void WrapTryCatchHandler(CilBody body, List<Instruction> catchHandler = null, ITypeDefOrRef catchType = null)
+        {
+            var finalInstructionIndex = body.Instructions.Count - 1;
+            var ret = new Instruction(OpCodes.Ret);
+
+            body.Instructions.Add(new Instruction(OpCodes.Leave_S, ret));
+            body.Instructions.Add(ret);
+
+            body.ExceptionHandlers.Add(new ExceptionHandler
+            {
+                TryStart = body.Instructions[0],
+                TryEnd = body.Instructions[finalInstructionIndex],
+                HandlerStart = body.Instructions[finalInstructionIndex],
+                HandlerEnd = ret,
+                HandlerType = ExceptionHandlerType.Catch,
+                CatchType = ModuleDefMD.Load(typeof(object).Module).CorLibTypes.Object.TypeDef
+                //CatchType = ModuleDefMD.Load(typeof(object).Module).Find("object", false)
+                //CatchType = new ModuleDefUser().CorLibTypes.Object.TypeDef
+            });
+        }
+
         public static List<Instruction> FetchInstructionsBySignature(IList<Instruction> instructions, IList<OpCode> signatureOpcodes)
         {
             for (var i = 0; i <= instructions.Count - signatureOpcodes.Count; i++)
@@ -340,7 +367,7 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
 
             return null;
         }
-        
+
         public static List<Instruction> FetchInstructionsBySignature(IList<Instruction> instructions, IList<Instruction> signatureInstructions, bool strict = true)
         {
             for (var i = 0; i <= instructions.Count - signatureInstructions.Count; i++)
