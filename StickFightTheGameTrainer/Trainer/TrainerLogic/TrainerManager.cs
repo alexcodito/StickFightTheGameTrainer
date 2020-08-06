@@ -217,12 +217,24 @@ public class TrainerManager : MonoBehaviour
 
             GUILayout.BeginHorizontal();
             GUILayout.BeginHorizontal(horizontalGroupStyle, GUILayout.Width(100));
-            Singleton<TrainerOptions>.Instance.SpawnPcEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnPcEnabled, " PC", toggleStyle, GUILayout.Width(50));
-            Singleton<TrainerOptions>.Instance.SpawnNpcEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnNpcEnabled, " NPC", toggleStyle, GUILayout.Width(50));
+            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnPcEnabled, " PC", toggleStyle, GUILayout.Width(50)) != Singleton<TrainerOptions>.Instance.SpawnPcEnabled)
+            {
+                Singleton<TrainerOptions>.Instance.SpawnPcEnabled = !Singleton<TrainerOptions>.Instance.SpawnPcEnabled;
+            }
+            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnNpcEnabled, " NPC", toggleStyle, GUILayout.Width(50)) != Singleton<TrainerOptions>.Instance.SpawnNpcEnabled)
+            {
+                Singleton<TrainerOptions>.Instance.SpawnNpcEnabled = !Singleton<TrainerOptions>.Instance.SpawnNpcEnabled;
+            }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(horizontalGroupStyle, GUILayout.Width(170));
-            Singleton<TrainerOptions>.Instance.AiAggressiveEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiAggressiveEnabled, " Aggressive", toggleStyle, GUILayout.Width(95));
-            Singleton<TrainerOptions>.Instance.AiNormalEnabled = GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiNormalEnabled, " Normal", toggleStyle, GUILayout.Width(60));
+            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiAggressiveEnabled, " Aggressive", toggleStyle, GUILayout.Width(95)) != Singleton<TrainerOptions>.Instance.AiAggressiveEnabled)
+            {
+                Singleton<TrainerOptions>.Instance.AiAggressiveEnabled = !Singleton<TrainerOptions>.Instance.AiAggressiveEnabled;
+            }
+            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiNormalEnabled, " Normal", toggleStyle, GUILayout.Width(60)) != Singleton<TrainerOptions>.Instance.AiNormalEnabled)
+            {
+                Singleton<TrainerOptions>.Instance.AiNormalEnabled = !Singleton<TrainerOptions>.Instance.AiNormalEnabled;
+            }
             GUILayout.EndHorizontal();
             GUILayout.EndHorizontal();
             GUILayout.Space(3);
@@ -230,11 +242,6 @@ public class TrainerManager : MonoBehaviour
             GUILayout.BeginHorizontal();
 
             if (GUILayout.Button("Player", buttonStyle, GUILayout.Width(75)))
-            {
-                SpawnBotDummy();
-            }
-
-            if (GUILayout.Button("Agent", buttonStyle, GUILayout.Width(75)))
             {
                 SpawnBotEnemyPlayer();
             }
@@ -491,15 +498,25 @@ public class TrainerManager : MonoBehaviour
 
     /// <summary>
     /// Spawn an NPC that deals and takes damage. 
-    private void SpawnBotDummy()
+    private void SpawnBotPlayer(GameObject playerPrefab)
     {
         var spawnPosition = Vector3.up * 8f;
         var spawnRotation = Quaternion.identity;
         var playerId = MultiplayerManager.mGameManager.controllerHandler.players.Count;
         var playerColors = MultiplayerManagerAssets.Instance.Colors;
-        var playerPrefab = MultiplayerManagerAssets.Instance.PlayerPrefab;
         var playerObject = UnityEngine.Object.Instantiate<GameObject>(playerPrefab, spawnPosition, spawnRotation);
         var playerController = playerObject.GetComponent<Controller>();
+
+        // Load player prefab component
+        var playerPrefabSetMovementAbilityComponent = MultiplayerManagerAssets.Instance.PlayerPrefab.GetComponent<SetMovementAbility>();
+
+        // Add required SetMovementAbility if it's missing.
+        if (playerObject.GetComponent<SetMovementAbility>() == null)
+        {
+            var hoardHandlerSetMovementAbilityComponent = playerObject.AddComponent<SetMovementAbility>();
+            hoardHandlerSetMovementAbilityComponent.abilities = playerPrefabSetMovementAbilityComponent.abilities;
+            hoardHandlerSetMovementAbilityComponent.bossHealth = playerPrefabSetMovementAbilityComponent.bossHealth;
+        }
 
         var playerLineRenderers = playerObject.GetComponentsInChildren<LineRenderer>();
         for (int i = 0; i < playerLineRenderers.Length; i++)
@@ -549,17 +566,38 @@ public class TrainerManager : MonoBehaviour
 
     private void SpawnBotEnemyPlayer()
     {
-        MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerPlayer.character);
+        if (Singleton<TrainerOptions>.Instance.SpawnPcEnabled)
+        {
+            SpawnBotPlayer(MultiplayerManagerAssets.Instance.PlayerPrefab);
+        }
+        else
+        {
+            MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerPlayer.character);
+        }
     }
 
     private void SpawnBotEnemyZombie()
     {
-        MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerZombie.character);
+        if (Singleton<TrainerOptions>.Instance.SpawnPcEnabled)
+        {
+            SpawnBotPlayer(hoardHandlerZombie.character);
+        }
+        else
+        {
+            MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerZombie.character);
+        }
     }
 
     private void SpawnBotEnemyBrat()
     {
-        MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerBrat.character);
+        if (Singleton<TrainerOptions>.Instance.SpawnPcEnabled)
+        {
+            SpawnBotPlayer(hoardHandlerBrat.character);
+        }
+        else
+        {
+            MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerBrat.character);
+        }
     }
 
     /// <summary>
