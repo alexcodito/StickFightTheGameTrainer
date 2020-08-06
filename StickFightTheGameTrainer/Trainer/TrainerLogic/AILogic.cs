@@ -150,9 +150,17 @@ public class AILogic : AI
             attacking = false;
             if (!behaviourTarget && canAttack && startAttackDelay < 0f)
             {
-                attacking = true;
-                reactionTime = 0.4f;
                 var currentAttackRange = range;
+                attacking = true;
+
+                if (Singleton<TrainerOptions>.Instance.AiAggressiveEnabled)
+                {
+                    reactionTime = 0.0f;
+                }
+                else
+                {
+                    reactionTime = 0.4f;
+                }
 
                 if (fighting.weapon)
                 {
@@ -177,13 +185,11 @@ public class AILogic : AI
                     {
                         reactionCounter = 0f;
                         controller.Attack();
-                        //return;
                     }
                 }
                 else if (reactionCounter > 0f)
                 {
                     reactionCounter -= Time.deltaTime;
-                    //return;
                 }
             }
         }

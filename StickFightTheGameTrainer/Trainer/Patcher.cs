@@ -313,8 +313,6 @@ namespace StickFightTheGameTrainer.Trainer
                 await _logger.Log("Could not inject trainer logic modules", LogLevel.Error);
             }
 
-            SaveAndReload();
-
             if (!InjectCustomAILogic())
             {
                 await _logger.Log("Could not inject AI logic module", LogLevel.Error);
