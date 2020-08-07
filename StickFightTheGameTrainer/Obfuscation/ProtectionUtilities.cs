@@ -31,7 +31,7 @@ namespace StickFightTheGameTrainer.Obfuscation
             var project = new ConfuserProject
             {
                 BaseDirectory = targetDirectory,
-                OutputDirectory = targetDirectory                
+                OutputDirectory = targetDirectory
             };
 
             ProjectModule module = new ProjectModule
@@ -41,6 +41,7 @@ namespace StickFightTheGameTrainer.Obfuscation
 
             module.Rules.Add(new Rule
             {
+                new SettingItem<Protection>("watermark", SettingItemAction.Remove),
                 new SettingItem<Protection>("anti debug"),
                 new SettingItem<Protection>("anti ildasm"),
                 new SettingItem<Protection>("ctrl flow"),
