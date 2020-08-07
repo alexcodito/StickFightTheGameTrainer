@@ -70,6 +70,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Confuser.Protections.dll</HintPath>
     </Reference>
+    <Reference Include="Confuser.Renamer">
+      <HintPath>lib\Confuser.Renamer.dll</HintPath>
+    </Reference>
     <Reference Include="Confuser.Runtime, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5fbc98a9d8494c64, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\Confuser.Runtime.dll</HintPath>
