@@ -95,20 +95,6 @@ namespace StickFightTheGameTrainer.Trainer
             return await Task.FromResult(true);
         }
 
-        private void ReloadLogicModule(bool reload = true)
-        {
-            var location = _logicModule.Location;
-            _logicModule.Dispose();
-            _logicModule = ModuleDefMD.Load(location);
-        }
-
-        private void DeleteTrainerLogicModule()
-        {
-            var location = _logicModule.Location;
-            _logicModule.Dispose();
-            File.Delete(location);
-        }
-
         private void SaveAndReload(bool reload = true)
         {
             _injectionHelpers.Save(_targetModule);
@@ -304,7 +290,6 @@ namespace StickFightTheGameTrainer.Trainer
             _targetFields.ForEach(async targetField => await _injectionHelpers.SetFieldAccessModifier(_targetModule, targetField.Key, targetField.Value, FieldAttributes.Assembly));
             _targetMethods.ForEach(async targetMethod => await _injectionHelpers.SetMethodAccessModifier(_targetModule, targetMethod.Key, targetMethod.Value, MethodAttributes.Assembly));
 
-            ReloadLogicModule();
             SaveAndReload();
 
             await _logger.Log("Injecting trainer logic modules");
@@ -378,10 +363,6 @@ namespace StickFightTheGameTrainer.Trainer
             await ApplyBotHasControlFix();
 
             SaveAndReload(false);
-
-            await _logger.Log("Deleting trainer logic module");
-
-            DeleteTrainerLogicModule();
 
             await _logger.Log("Protecting module");
 
@@ -573,7 +554,7 @@ namespace StickFightTheGameTrainer.Trainer
                 CompilerOptions = "/d:DEBUG",
 #endif
                 IncludeDebugInformation = false,
-                OutputAssembly = trainerLogicDllPath
+                GenerateInMemory = true
             };
 
             // The game is compiled under .NET 3.5, so this has to be matched.
@@ -586,7 +567,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             if (textMeshProReferenceLibrary.Length == 0)
             {
-                await _logger.Log("Could not locate TextMeshPro reference library");
+                await _logger.Log("Could not locate TextMeshPro reference library", LogLevel.Error);
                 return await Task.FromResult(false);
             }
 
@@ -614,8 +595,24 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
+            var logicModuleCompiledAssembly = results.CompiledAssembly;
+
+            if(logicModuleCompiledAssembly == null)
+            {
+                await _logger.Log("Trainer Logic assembly could not be loaded from memory", LogLevel.Error);
+                return await Task.FromResult(false);
+            }
+
+            var modules = logicModuleCompiledAssembly.GetModules();
+
+            if(modules.Length == 0)
+            {
+                await _logger.Log("Trainer Logic assembly does not contain any modules", LogLevel.Error);
+                return await Task.FromResult(false);
+            }
+
             // Load the compiled DLL 
-            await LoadLogicModule(trainerLogicDllPath);
+            await LoadLogicModule(modules[0]);
 
             return await Task.FromResult(true);
         }
@@ -1219,15 +1216,15 @@ namespace StickFightTheGameTrainer.Trainer
             return true;
         }
 
-        private async Task LoadLogicModule(string logicModulePath)
+        private async Task LoadLogicModule(System.Reflection.Module logicModule)
         {
-            if (!File.Exists(logicModulePath))
+            if (logicModule == null)
             {
                 await _logger.Log("Could not locate logic module", LogLevel.Error);
                 return;
             }
-
-            _logicModule = ModuleDefMD.Load(logicModulePath);
+            
+            _logicModule = ModuleDefMD.Load(logicModule);
 
             if (_logicModule == null)
             {
