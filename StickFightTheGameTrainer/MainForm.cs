@@ -66,7 +66,7 @@ namespace StickFightTheGameTrainer
                 }
                 else
                 {
-                    BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
+                    btnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
                     MessageBox.Show("The patch has been successfully installed");
                 }
 
@@ -116,7 +116,7 @@ namespace StickFightTheGameTrainer
 
                 txtGamePath.Text = attemptedPath;
 
-                BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(txtGamePath.Text);
+                btnRestoreBackup.Enabled = await _patcher.CheckBackupExists(txtGamePath.Text);
 
                 btnInstallMod.Enabled = true;
 
@@ -146,14 +146,14 @@ namespace StickFightTheGameTrainer
             if (CheckValidPath(txtGamePath.Text) == false)
             {
                 btnInstallMod.Enabled = false;
-                BtnRestoreBackup.Enabled = false;
+                btnRestoreBackup.Enabled = false;
                 return;
             }
 
             var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
             
             btnInstallMod.Enabled = File.Exists(targetPath);
-            BtnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
+            btnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
         }
 
         private async void GenerateEncryptedSourcesAndKeysToolStripMenuItem_ClickAsync(object sender, EventArgs e)
@@ -228,7 +228,7 @@ namespace StickFightTheGameTrainer
             return targetPath;
         }
 
-        private void btnDeveloperOptions_Click(object sender, EventArgs e)
+        private void BtnDeveloperOptions_Click(object sender, EventArgs e)
         {
             var x = Location.X + ((Control)sender).Location.X;
             var y = Location.Y + ((Control)sender).Location.Y;

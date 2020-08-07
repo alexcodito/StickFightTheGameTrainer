@@ -124,16 +124,19 @@
   <data name="image_minus" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\image_minus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="image_key" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\image_key.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="image_win_folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\image_win_folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="image_plus" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\image_plus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="image_bug" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\image_bug.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="image_key" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\image_key.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="image_plus" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\image_plus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="image_button_background" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\image_button_background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

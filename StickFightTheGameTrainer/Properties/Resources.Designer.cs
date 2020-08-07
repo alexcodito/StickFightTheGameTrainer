@@ -83,6 +83,16 @@ namespace StickFightTheGameTrainer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap image_button_background {
+            get {
+                object obj = ResourceManager.GetObject("image_button_background", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap image_key {
             get {
                 object obj = ResourceManager.GetObject("image_key", resourceCulture);

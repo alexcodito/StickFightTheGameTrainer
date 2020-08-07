@@ -36,19 +36,19 @@ namespace StickFightTheGameTrainer
             MessageBox.Show(decryptedLogs);
         }
 
-        private void btnCopyToClipboard_Click(object sender, EventArgs e)
+        private void BtnCopyToClipboard_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(radRichTextEditorErrorLog.Text);
             MessageBox.Show(@"Successfully copied to the clipboard");
         }
 
-        private void linkLabelModdb_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LinkLabelModdb_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             linkLabelModdb.LinkVisited = true;
             System.Diagnostics.Process.Start(linkLabelModdb.Text);
         }
 
-        private void btnDecLog_Click(object sender, EventArgs e)
+        private void BtnDecLog_Click(object sender, EventArgs e)
         {
             DecryptLogReport();
         }
@@ -57,6 +57,32 @@ namespace StickFightTheGameTrainer
         {
             e.Cancel = true;
             Hide();
+        }
+
+        private void BtnMouseEnter(object sender, EventArgs e)
+        {
+            var btnSender = (Button)sender;
+            btnSender.BackgroundImageLayout = ImageLayout.Tile;
+        }
+
+        private void BtnMouseLeave(object sender, EventArgs e)
+        {
+            var btnSender = (Button)sender;
+            btnSender.BackgroundImageLayout = ImageLayout.Stretch;
+        }
+
+        private void BtnMouseDown(object sender, MouseEventArgs e)
+        {
+            var btnSender = (Button)sender;
+            btnSender.Tag = btnSender.BackgroundImage;
+            btnSender.BackgroundImage = null;
+        }
+
+        private void BtnMouseUp(object sender, MouseEventArgs e)
+        {
+            var btnSender = (Button)sender;
+            btnSender.BackgroundImage = (System.Drawing.Image)btnSender.Tag;
+            btnSender.Tag = null;
         }
     }
 }

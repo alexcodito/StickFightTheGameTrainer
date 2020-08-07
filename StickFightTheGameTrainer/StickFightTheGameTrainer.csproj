@@ -97,6 +97,7 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Net" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xaml" />
@@ -108,32 +109,6 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="Telerik.WinControls, Version=2016.2.608.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Telerik\UI for WinForms Q2 2016\Bin40\Telerik.WinControls.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Telerik.WinControls.RichTextBox, Version=2016.2.608.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Telerik\UI for WinForms Q2 2016\Bin40\Telerik.WinControls.RichTextBox.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Telerik.WinControls.RichTextEditor, Version=2016.2.608.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Telerik\UI for WinForms Q2 2016\Bin40\Telerik.WinControls.RichTextEditor.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Telerik.WinControls.Themes.TelerikMetro, Version=2016.2.608.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Telerik\UI for WinForms Q2 2016\Bin40\Telerik.WinControls.Themes.TelerikMetro.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="Telerik.WinControls.UI, Version=2016.2.608.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e, processorArchitecture=MSIL">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="TelerikCommon, Version=2016.2.608.40, Culture=neutral, PublicKeyToken=5bb2a467cbec794e">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\AESUtility.cs" />
@@ -142,6 +117,7 @@
     <Compile Include="Common\LogLevel.cs" />
     <Compile Include="Common\LogMessage.cs" />
     <Compile Include="Common\RSAUtility.cs" />
+    <Compile Include="Controls\BorderedPanel.cs" />
     <Compile Include="ErrorReportingForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -191,8 +167,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
@@ -223,6 +199,7 @@
     <Content Include="icon_app_64x64.ico" />
     <Content Include="Resources\icon_app_64x64.ico" />
     <Content Include="Resources\image_bug.png" />
+    <None Include="Resources\image_button_background.png" />
     <Content Include="Resources\image_minus.png" />
     <Content Include="Resources\image_plus.png" />
     <Content Include="Resources\image_win_folder.png" />
