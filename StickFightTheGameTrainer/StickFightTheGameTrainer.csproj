@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>StickFightTheGameTrainer</RootNamespace>
     <AssemblyName>Stick Fight The Game Trainer by Loxa</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
@@ -58,9 +58,25 @@
     <StartupObject>StickFightTheGameTrainer.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Confuser.Core, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5fbc98a9d8494c64, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Confuser.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Confuser.DynCipher, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5fbc98a9d8494c64, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Confuser.DynCipher.dll</HintPath>
+    </Reference>
+    <Reference Include="Confuser.Protections, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5fbc98a9d8494c64, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Confuser.Protections.dll</HintPath>
+    </Reference>
+    <Reference Include="Confuser.Runtime, Version=1.4.0.0, Culture=neutral, PublicKeyToken=5fbc98a9d8494c64, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Confuser.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="dnlib, Version=2.1.0.0, Culture=neutral, PublicKeyToken=50e96378b6e77999, processorArchitecture=MSIL">
-      <HintPath>..\packages\dnlib-new.2.1.0\lib\dnlib.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\dnlib.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
@@ -129,6 +145,7 @@
     <Compile Include="ErrorReportingForm.Designer.cs">
       <DependentUpon>ErrorReportingForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Obfuscation\ProtectionUtilities.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

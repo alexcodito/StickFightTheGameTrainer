@@ -1,6 +1,7 @@
 ﻿using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using StickFightTheGameTrainer.Common;
+using StickFightTheGameTrainer.Obfuscation;
 using StickFightTheGameTrainer.Trainer.Helpers;
 using StickFightTheGameTrainer.Trainer.TrainerLogic;
 using System;
@@ -19,6 +20,7 @@ namespace StickFightTheGameTrainer.Trainer
         private ModuleDefMD _targetModule;
         private string _targetModulePath;
         private readonly InjectionHelpers _injectionHelpers;
+        private readonly ProtectionUtilities _protectionUtilities;
         private readonly Common.ILogger _logger;
         private readonly TrainerLogicModuleBuilder _trainerLogicModuleBuilder;
 
@@ -64,11 +66,12 @@ namespace StickFightTheGameTrainer.Trainer
             new KeyValuePair<string, string>("MultiplayerManager", "SendMessageToAllClients"),
         };
 
-        public Patcher(Common.ILogger logger, InjectionHelpers injectionHelpers, TrainerLogicModuleBuilder trainerLogicModuleBuilder)
+        public Patcher(Common.ILogger logger, InjectionHelpers injectionHelpers, TrainerLogicModuleBuilder trainerLogicModuleBuilder, ProtectionUtilities protectionUtilities)
         {
             _logger = logger;
             _injectionHelpers = injectionHelpers;
             _trainerLogicModuleBuilder = trainerLogicModuleBuilder;
+            _protectionUtilities = protectionUtilities;
         }
 
         public async Task<bool> LoadTargetModule(string targetModulePath)
@@ -377,9 +380,16 @@ namespace StickFightTheGameTrainer.Trainer
 
             SaveAndReload(false);
 
+            await _logger.Log("Deleting trainer logic module");
+
             DeleteTrainerLogicModule();
 
-            await _logger.Log("Deleting trainer logic module");
+            await _logger.Log("Protecting module");
+
+            if(await _protectionUtilities.ProtectAssembly(_targetModulePath) == false)
+            {
+                await _logger.Log("Could not protect module", LogLevel.Warning);
+            }
 
             await _logger.Log("Patching completed");
 
