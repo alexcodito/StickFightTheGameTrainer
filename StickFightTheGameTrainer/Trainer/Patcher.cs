@@ -105,14 +105,13 @@ namespace StickFightTheGameTrainer.Trainer
         private void DeleteTrainerLogicModule()
         {
             var location = _logicModule.Location;
-
             _logicModule.Dispose();
             File.Delete(location);
         }
 
         private void SaveAndReload(bool reload = true)
         {
-            _injectionHelpers.Save(_targetModule, true);
+            _injectionHelpers.Save(_targetModule);
 
             if (reload)
             {

@@ -16,17 +16,21 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             _logger = logger;
         }
 
-        public void Save(ModuleDefMD targetModule, bool overwrite)
+        public void Save(ModuleDefMD targetModule)
         {
             var targetLocation = targetModule.Location;
-            var patchedLocation = targetLocation.Replace(".dll", "_patched.dll");
 
-            targetModule.Write(patchedLocation);
-
-            if (overwrite)
+            using(var ms = new MemoryStream())
             {
+                targetModule.Write(ms);
                 targetModule.Dispose();
-                File.Copy(patchedLocation, targetLocation, true);
+
+                ms.Seek(0, SeekOrigin.Begin);
+                using (var fs = new FileStream(targetLocation, FileMode.Create))
+                {
+                    ms.CopyTo(fs);
+                    fs.Flush();
+                }
             }
         }
 
