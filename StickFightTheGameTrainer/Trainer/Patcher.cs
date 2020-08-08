@@ -119,7 +119,7 @@ namespace StickFightTheGameTrainer.Trainer
             {
                 var trainerPatchIndicator = stickFightConstantsTypeDef.FindField("LoxaTrainerPatch");
 
-                if(trainerPatchIndicator != null)
+                if (trainerPatchIndicator != null)
                 {
                     return await Task.FromResult(true);
                 }
@@ -353,23 +353,25 @@ namespace StickFightTheGameTrainer.Trainer
             await _logger.Log("Applying bot death fix");
 
             await ApplyBotDeathFix();
-            
+
             await _logger.Log("Applying bot collision fix");
 
             await ApplyBotCollisionFix();
-            
+
             await _logger.Log("Applying bot HasControl fix");
 
             await ApplyBotHasControlFix();
 
             SaveAndReload(false);
 
+#if !DEBUG
             await _logger.Log("Protecting module");
 
-            if(await _protectionUtilities.ProtectAssembly(_targetModulePath) == false)
+            if (await _protectionUtilities.ProtectAssembly(_targetModulePath) == false)
             {
                 await _logger.Log("Could not protect module", LogLevel.Warning);
             }
+#endif
 
             await _logger.Log("Patching completed");
 
@@ -597,7 +599,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             var logicModuleCompiledAssembly = results.CompiledAssembly;
 
-            if(logicModuleCompiledAssembly == null)
+            if (logicModuleCompiledAssembly == null)
             {
                 await _logger.Log("Trainer Logic assembly could not be loaded from memory", LogLevel.Error);
                 return await Task.FromResult(false);
@@ -605,7 +607,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             var modules = logicModuleCompiledAssembly.GetModules();
 
-            if(modules.Length == 0)
+            if (modules.Length == 0)
             {
                 await _logger.Log("Trainer Logic assembly does not contain any modules", LogLevel.Error);
                 return await Task.FromResult(false);
@@ -919,7 +921,7 @@ namespace StickFightTheGameTrainer.Trainer
                 await _logger.Log("Apply bot collision fix: Controller set collision method signature does not match any instructions", LogLevel.Error);
             }
         }
-        
+
         /// <summary>
         /// Enable bots to be considered as in control and to go for guns. 
         /// </summary>
@@ -1223,7 +1225,7 @@ namespace StickFightTheGameTrainer.Trainer
                 await _logger.Log("Could not locate logic module", LogLevel.Error);
                 return;
             }
-            
+
             _logicModule = ModuleDefMD.Load(logicModule);
 
             if (_logicModule == null)
