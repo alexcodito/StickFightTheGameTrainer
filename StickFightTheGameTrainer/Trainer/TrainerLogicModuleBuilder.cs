@@ -1,4 +1,5 @@
 ﻿using StickFightTheGameTrainer.Common;
+using StickFightTheGameTrainer.Trainer.TrainerLogic;
 using System;
 using System.Collections.Generic;
 using System.IO;
