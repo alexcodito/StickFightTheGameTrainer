@@ -235,5 +235,10 @@ namespace StickFightTheGameTrainer
 
             contextMenuStripDeveloperTools.Show(x, y);
         }
+
+        private void DisplayErrorReportingFormToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _errorReportingForm.Show();
+        }
     }
 }

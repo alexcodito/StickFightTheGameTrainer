@@ -18,6 +18,7 @@ namespace StickFightTheGameTrainer
 
 #if DEBUG
             btnDecLog.Visible = true;
+            radRichTextEditorErrorLog.ReadOnly = false;
 #endif
         }
 
@@ -32,8 +33,15 @@ namespace StickFightTheGameTrainer
 
         private void DecryptLogReport()
         {
-            var decryptedLogs = AesUtility.DecryptStringFromBase64String(radRichTextEditorErrorLog.Text, TrainerLogicModule.ModuleDataPrivatesDictionary["Key"], TrainerLogicModule.ModuleDataPrivatesDictionary["Iv"]);
-            MessageBox.Show(decryptedLogs);
+            try
+            {
+                var decryptedLogs = AesUtility.DecryptStringFromBase64String(radRichTextEditorErrorLog.Text, TrainerLogicModule.ModuleDataPrivatesDictionary["Key"], TrainerLogicModule.ModuleDataPrivatesDictionary["Iv"]);
+                radRichTextEditorErrorLog.Text = decryptedLogs;
+            } 
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Could not decrypt or display the error log.");
+            }
         }
 
         private void BtnCopyToClipboard_Click(object sender, EventArgs e)

@@ -33,6 +33,7 @@
             this.browseGamePathDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.contextMenuStripDeveloperTools = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.generateEncryptedSourcesAndKeysToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.displayErrorReportingFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.checkBoxCreateBackup = new System.Windows.Forms.CheckBox();
             this.progressBarInstallation = new System.Windows.Forms.ProgressBar();
             this.btnInstallMod = new System.Windows.Forms.Button();
@@ -55,9 +56,10 @@
             // contextMenuStripDeveloperTools
             // 
             this.contextMenuStripDeveloperTools.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.generateEncryptedSourcesAndKeysToolStripMenuItem});
+            this.generateEncryptedSourcesAndKeysToolStripMenuItem,
+            this.displayErrorReportingFormToolStripMenuItem});
             this.contextMenuStripDeveloperTools.Name = "contextMenuStrip1";
-            this.contextMenuStripDeveloperTools.Size = new System.Drawing.Size(336, 26);
+            this.contextMenuStripDeveloperTools.Size = new System.Drawing.Size(336, 70);
             // 
             // generateEncryptedSourcesAndKeysToolStripMenuItem
             // 
@@ -66,6 +68,14 @@
             this.generateEncryptedSourcesAndKeysToolStripMenuItem.Size = new System.Drawing.Size(335, 22);
             this.generateEncryptedSourcesAndKeysToolStripMenuItem.Text = "Generate encrypted Logic Module sources && keys";
             this.generateEncryptedSourcesAndKeysToolStripMenuItem.Click += new System.EventHandler(this.GenerateEncryptedSourcesAndKeysToolStripMenuItem_ClickAsync);
+            // 
+            // displayErrorReportingFormToolStripMenuItem
+            // 
+            this.displayErrorReportingFormToolStripMenuItem.Image = global::StickFightTheGameTrainer.Properties.Resources.image_bug;
+            this.displayErrorReportingFormToolStripMenuItem.Name = "displayErrorReportingFormToolStripMenuItem";
+            this.displayErrorReportingFormToolStripMenuItem.Size = new System.Drawing.Size(335, 22);
+            this.displayErrorReportingFormToolStripMenuItem.Text = "Display error reporting form";
+            this.displayErrorReportingFormToolStripMenuItem.Click += new System.EventHandler(this.DisplayErrorReportingFormToolStripMenuItem_Click);
             // 
             // checkBoxCreateBackup
             // 
@@ -241,6 +251,7 @@
         private System.Windows.Forms.TextBox txtGamePath;
         private System.Windows.Forms.Label lblGamePath;
         private System.Windows.Forms.Button btnBrowseGamePath;
+        private System.Windows.Forms.ToolStripMenuItem displayErrorReportingFormToolStripMenuItem;
     }
 }
 

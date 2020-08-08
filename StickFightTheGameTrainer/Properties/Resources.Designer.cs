@@ -61,6 +61,16 @@ namespace StickFightTheGameTrainer.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon icon_bug {
+            get {
+                object obj = ResourceManager.GetObject("icon_bug", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap image_arrows {
@@ -71,12 +81,12 @@ namespace StickFightTheGameTrainer.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Icon image_bug {
+        internal static System.Drawing.Bitmap image_bug {
             get {
                 object obj = ResourceManager.GetObject("image_bug", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
