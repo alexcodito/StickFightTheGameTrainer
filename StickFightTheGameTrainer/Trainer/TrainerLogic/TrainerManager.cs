@@ -279,27 +279,30 @@ public class TrainerManager : MonoBehaviour
 
         if (Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
-            // Display healthbars and scores for all players
-            foreach (var player in MultiplayerManager.mGameManager.controllerHandler.players)
+            if(MultiplayerManager.mGameManager != null && MultiplayerManager.mGameManager.controllerHandler != null && MultiplayerManager.mGameManager.controllerHandler.players != null)
             {
-                if (player.fighting != null)
+                // Display healthbars and scores for all players
+                foreach (var player in MultiplayerManager.mGameManager.controllerHandler.players)
                 {
-                    if (Singleton<TrainerOptions>.Instance.DisplayHealthBars)
+                    if (player != null && player.fighting != null)
                     {
-                        var health = 0f;
-                        var healthHandler = player.fighting.GetComponent<HealthHandler>();
-                        if (healthHandler != null)
+                        if (Singleton<TrainerOptions>.Instance.DisplayHealthBars)
                         {
-                            health = player.fighting.GetComponent<HealthHandler>().health;
+                            var health = 0f;
+                            var healthHandler = player.fighting.GetComponent<HealthHandler>();
+                            if (healthHandler != null)
+                            {
+                                health = healthHandler.health;
+                            }
+
+                            EditorGUITools.DrawRect(new Rect(Screen.width - 125, 30f * player.playerID + 10f, Math.Max(0f, health), 20f), GetPlayerColorByIndex(player.playerID), null);
+                            GUI.Label(new Rect(Screen.width - 160, 30f * player.playerID + 10f, 250f, 25f), Math.Max(0.0, Math.Round(health)).ToString());
                         }
 
-                        EditorGUITools.DrawRect(new Rect(Screen.width - 125, 30f * player.playerID + 10f, Math.Max(0f, health), 20f), GetPlayerColorByIndex(player.playerID), null);
-                        GUI.Label(new Rect(Screen.width - 160, 30f * player.playerID + 10f, 250f, 25f), Math.Max(0.0, Math.Round(health)).ToString());
-                    }
-
-                    if (Singleton<TrainerOptions>.Instance.DisplayScore && player.fighting.stats != null)
-                    {
-                        GUI.Label(new Rect(Screen.width - 180, 30f * (float)player.playerID + 10f, 250f, 25f), "<b>" + player.fighting.stats.wins.ToString() + "</b>");
+                        if (Singleton<TrainerOptions>.Instance.DisplayScore && player.fighting.stats != null)
+                        {
+                            GUI.Label(new Rect(Screen.width - 180, 30f * (float)player.playerID + 10f, 250f, 25f), "<b>" + player.fighting.stats.wins.ToString() + "</b>");
+                        }
                     }
                 }
             }
