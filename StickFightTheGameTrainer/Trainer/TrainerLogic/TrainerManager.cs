@@ -335,7 +335,7 @@ public class TrainerManager : MonoBehaviour
             }
 
             // Change map / level (triggered by any player)
-            if ((Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKeyUp(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.S)))
+            if (!ChatManager.isTyping && ((Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton1) && Input.GetKeyUp(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.S))))
             {
                 Singleton<TrainerOptions>.Instance.NoWinners = true;
 
@@ -352,19 +352,19 @@ public class TrainerManager : MonoBehaviour
             }
 
             // Toggle display of trainer menu (triggered by any player)
-            if ((Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKeyUp(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKey(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.M)))
+            if (!ChatManager.isTyping && ((Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKeyUp(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKey(KeyCode.JoystickButton5)) || (Input.GetKeyUp(KeyCode.JoystickButton0) && Input.GetKey(KeyCode.JoystickButton5)) || ((Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Input.GetKeyUp(KeyCode.M))))
             {
                 Singleton<TrainerOptions>.Instance.DisplayTrainerMenu = !Singleton<TrainerOptions>.Instance.DisplayTrainerMenu;
             }
 
             // Spawn random weapon (Keyboard)
-            if (Input.GetKeyUp(KeyCode.R))
+            if (!ChatManager.isTyping && Input.GetKeyUp(KeyCode.R))
             {
                 SpawnRandomWeapon(false);
             }
 
             // Spawn random present (Keyboard)
-            if (Input.GetKeyUp(KeyCode.P))
+            if (!ChatManager.isTyping && Input.GetKeyUp(KeyCode.P))
             {
                 SpawnRandomWeapon(true);
             }
@@ -377,19 +377,19 @@ public class TrainerManager : MonoBehaviour
                     if (controller != null && controller.mPlayerActions != null && controller.mPlayerActions.activeDevice != null)
                     {
                         // Spawn random weapon (Joystick)
-                        if (controller.mPlayerActions.activeDevice.DPadUp.WasReleased)
+                        if (!ChatManager.isTyping && controller.mPlayerActions.activeDevice.DPadUp.WasReleased)
                         {
                             SpawnRandomWeapon(false);
                         }
 
                         // Spawn random present (Joystick)
-                        if (controller.mPlayerActions.activeDevice.DPadDown.WasReleased)
+                        if (!ChatManager.isTyping && controller.mPlayerActions.activeDevice.DPadDown.WasReleased)
                         {
                             SpawnRandomWeapon(true);
                         }
 
                         // Select next weapon for the requesting player
-                        if (controller.mPlayerActions.activeDevice.DPadLeft.WasReleased || (Input.GetKeyUp(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)))
+                        if (!ChatManager.isTyping && (controller.mPlayerActions.activeDevice.DPadLeft.WasReleased || (Input.GetKeyUp(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any))))
                         {
                             if (controller.fighting.TrainerWeaponIndex <= 0)
                             {
@@ -420,7 +420,7 @@ public class TrainerManager : MonoBehaviour
                         }
 
                         // Select previous weapon for the requesting player
-                        if (controller.mPlayerActions.activeDevice.DPadRight.WasReleased || (Input.GetKeyUp(KeyCode.E) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)))
+                        if (!ChatManager.isTyping && (controller.mPlayerActions.activeDevice.DPadRight.WasReleased || (Input.GetKeyUp(KeyCode.E) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any))))
                         {
                             if (controller.fighting.weapons.transform.childCount <= controller.fighting.TrainerWeaponIndex)
                             {
