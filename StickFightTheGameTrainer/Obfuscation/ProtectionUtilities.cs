@@ -3,6 +3,7 @@ using Confuser.Core.Project;
 using StickFightTheGameTrainer.Common;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace StickFightTheGameTrainer.Obfuscation
@@ -10,7 +11,7 @@ namespace StickFightTheGameTrainer.Obfuscation
     public class ProtectionUtilities : Confuser.Core.ILogger
     {
         private readonly Common.ILogger _logger;
-        private readonly LogLevel _errorLogLevel = LogLevel.Warning; // Do not abort if the protection stage fails.
+        private readonly LogLevel _errorLogLevel = LogLevel.Error;
         private bool _successfullyProtected;
 
         public ProtectionUtilities(Common.ILogger logger)
@@ -33,6 +34,9 @@ namespace StickFightTheGameTrainer.Obfuscation
                 BaseDirectory = targetDirectory,
                 OutputDirectory = targetDirectory
             };
+
+            // Confuser plugins are merged into the main assembly at build time. Instruct the project to load them from the running executable.
+            project.PluginPaths.Add(Assembly.GetExecutingAssembly().Location);
 
             ProjectModule module = new ProjectModule
             {
@@ -85,7 +89,7 @@ namespace StickFightTheGameTrainer.Obfuscation
 
         public void ErrorException(string msg, Exception ex)
         {
-            _logger.Log(msg, _errorLogLevel);
+            _logger.Log(msg + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, _errorLogLevel);
         }
 
         public void ErrorFormat(string format, params object[] args)
@@ -119,7 +123,7 @@ namespace StickFightTheGameTrainer.Obfuscation
 
         public void WarnException(string msg, Exception ex)
         {
-            _logger.Log(msg, LogLevel.Warning);
+            _logger.Log(msg + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace, LogLevel.Warning);
         }
 
         public void WarnFormat(string format, params object[] args)
