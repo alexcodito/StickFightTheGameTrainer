@@ -143,6 +143,7 @@
             this.btnDeveloperOptions.TabIndex = 11;
             this.btnDeveloperOptions.Text = "Dev. Options";
             this.btnDeveloperOptions.UseVisualStyleBackColor = false;
+            this.btnDeveloperOptions.Visible = false;
             this.btnDeveloperOptions.Click += new System.EventHandler(this.BtnDeveloperOptions_Click);
             // 
             // lblGamePath
