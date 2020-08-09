@@ -25,6 +25,16 @@ public class TrainerOptions : Singleton<TrainerOptions>
 
     public bool UnlimitedHealth;
 
+    public float AiDamageMultiplier;
+    
+    public float AiPunchForce;
+
+    public float AiPunchTime;
+
+    public float AiMovementForceMultiplier;
+
+    public float AiMovementJumpForceMultiplier;
+
     private bool _spawnPcEnabled;
 
     private bool _spawnNpcEnabled;
@@ -32,7 +42,7 @@ public class TrainerOptions : Singleton<TrainerOptions>
     private bool _aiAggressiveEnabled;
 
     private bool _aiNormalEnabled;
-
+    
     public bool SpawnPcEnabled
     {
         get
@@ -88,7 +98,7 @@ public class TrainerOptions : Singleton<TrainerOptions>
             _aiAggressiveEnabled = !value;
         }
     }
-
+    
     public bool CheatsEnabled
     {
         get
@@ -103,6 +113,11 @@ public class TrainerOptions : Singleton<TrainerOptions>
         this.DisplayHealthBars = true;
         this.DisplayScore = true;
         this.DisplayTrainerMenu = true;
+        this.AiDamageMultiplier = 1f;
+        this.AiPunchForce = 120000f;
+        this.AiPunchTime = 0.1f;
+        this.AiMovementForceMultiplier = 4000f;
+        this.AiMovementJumpForceMultiplier = 25.0f;
         this._spawnPcEnabled = true;
         this._aiAggressiveEnabled = true;
     }

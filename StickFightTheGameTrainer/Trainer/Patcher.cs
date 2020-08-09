@@ -37,6 +37,7 @@ namespace StickFightTheGameTrainer.Trainer
             new KeyValuePair<string, string>("AI", "reactionCounter"),
             new KeyValuePair<string, string>("AI", "targetInformation"),
             new KeyValuePair<string, string>("AI", "velocity"),
+            new KeyValuePair<string, string>("HoardHandler", "charactersAlive"),
             new KeyValuePair<string, string>("MultiplayerManager", "mGameManager"),
             new KeyValuePair<string, string>("GameManager", "controllerHandler"),
             new KeyValuePair<string, string>("GameManager", "m_WeaponSelectionHandler"),
@@ -45,6 +46,7 @@ namespace StickFightTheGameTrainer.Trainer
             new KeyValuePair<string, string>("GameManager", "levelSelector"),
             new KeyValuePair<string, string>("GameManager", "hoardHandler"),
             new KeyValuePair<string, string>("Controller", "fighting"),
+            new KeyValuePair<string, string>("Controller", "movement"),
             new KeyValuePair<string, string>("Controller", "mPlayerActions"),
             new KeyValuePair<string, string>("Fighting", "stats"),
             new KeyValuePair<string, string>("Fighting", "mNetworkPlayer"),
@@ -1198,7 +1200,7 @@ namespace StickFightTheGameTrainer.Trainer
             var updateMethodDef = sourceModuleAiTypeDef.FindMethod("Update");
             var customUpdateMethodDef = destinationAiTypeDef.FindMethod("UpdateHandler");
 
-            // Replace all variables, instructions and exception handler in AI.Update from AILogic.UpdateHandler
+            // Replace all variables, instructions and exception handlers in AI.Update from AILogic.UpdateHandler
             updateMethodDef.Body.Variables.Clear();
             updateMethodDef.Body.Instructions.Clear();
             updateMethodDef.Body.ExceptionHandlers.Clear();

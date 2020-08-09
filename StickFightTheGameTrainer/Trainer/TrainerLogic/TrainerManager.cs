@@ -74,22 +74,27 @@ public class TrainerManager : MonoBehaviour
     public void OnGUI()
     {
 #if DEBUG
-        DisplayUnityLogs(460f, 25f, 420f, 455f);
+        DisplayUnityLogs(460f, 25f, 420f, 505f);
 #endif
         if (Singleton<TrainerOptions>.Instance.DisplayTrainerMenu && Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
             var containerWidth = 420f;
-            var containerHeight = 455f;
+            var containerHeight = 505f;
 
             var containerStyle = new GUIStyle(GUI.skin.box)
             {
                 padding = new RectOffset(10, 10, 10, 5)
             };
 
-            var horizontalGroupStyle = new GUIStyle(GUI.skin.box)
+            var horizontalToggleGroupStyle = new GUIStyle(GUI.skin.box)
             {
                 padding = new RectOffset(5, 5, 0, 0),
                 fixedHeight = 25f
+            };
+
+            var horizontalSliderGroupStyle = new GUIStyle(GUI.skin.box)
+            {
+                padding = new RectOffset(0, 0, 0, 0),
             };
 
             var toggleStyle = new GUIStyle(GUI.skin.toggle)
@@ -101,6 +106,11 @@ public class TrainerManager : MonoBehaviour
             var buttonStyle = new GUIStyle(GUI.skin.button)
             {
                 padding = new RectOffset(5, 5, 5, 5)
+            };
+            
+            var sliderStyle = new GUIStyle()
+            {
+                padding = new RectOffset(8, 8, 0, 0)
             };
 
             // Calculate / format frame-rate
@@ -217,17 +227,19 @@ public class TrainerManager : MonoBehaviour
             GUILayout.Label("<color=grey><b>Spawn Bots</b></color>");
 
             GUILayout.BeginHorizontal();
-            GUILayout.BeginHorizontal(horizontalGroupStyle, GUILayout.Width(100));
-            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnPcEnabled, " PC", toggleStyle, GUILayout.Width(50)) != Singleton<TrainerOptions>.Instance.SpawnPcEnabled)
+
+            GUILayout.BeginHorizontal(horizontalToggleGroupStyle, GUILayout.Width(100));
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnPcEnabled, " PC", toggleStyle, GUILayout.Width(50)) != Singleton<TrainerOptions>.Instance.SpawnPcEnabled)
             {
                 Singleton<TrainerOptions>.Instance.SpawnPcEnabled = !Singleton<TrainerOptions>.Instance.SpawnPcEnabled;
             }
-            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnNpcEnabled, " NPC", toggleStyle, GUILayout.Width(50)) != Singleton<TrainerOptions>.Instance.SpawnNpcEnabled)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.SpawnNpcEnabled, " NPC", toggleStyle, GUILayout.Width(50)) != Singleton<TrainerOptions>.Instance.SpawnNpcEnabled)
             {
                 Singleton<TrainerOptions>.Instance.SpawnNpcEnabled = !Singleton<TrainerOptions>.Instance.SpawnNpcEnabled;
             }
             GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal(horizontalGroupStyle, GUILayout.Width(170));
+
+            GUILayout.BeginHorizontal(horizontalToggleGroupStyle, GUILayout.Width(170));
             if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiAggressiveEnabled, " Aggressive", toggleStyle, GUILayout.Width(95)) != Singleton<TrainerOptions>.Instance.AiAggressiveEnabled)
             {
                 Singleton<TrainerOptions>.Instance.AiAggressiveEnabled = !Singleton<TrainerOptions>.Instance.AiAggressiveEnabled;
@@ -237,6 +249,62 @@ public class TrainerManager : MonoBehaviour
                 Singleton<TrainerOptions>.Instance.AiNormalEnabled = !Singleton<TrainerOptions>.Instance.AiNormalEnabled;
             }
             GUILayout.EndHorizontal();
+
+            GUILayout.EndHorizontal();
+            GUILayout.Space(3);
+
+            GUILayout.BeginHorizontal(horizontalSliderGroupStyle);
+
+            GUILayout.BeginVertical(sliderStyle);
+            GUILayout.Label("Damage");
+            var aiDamageMultiplier = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiDamageMultiplier, 1f, 5f);
+            if(aiDamageMultiplier != Singleton<TrainerOptions>.Instance.AiDamageMultiplier)
+            {
+                Singleton<TrainerOptions>.Instance.AiDamageMultiplier = aiDamageMultiplier;
+                SetBotStats();
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical(sliderStyle);
+            GUILayout.Label("Punch Force");
+            var aiPunchForce = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiPunchForce, 120000f, 800000f);
+            if(aiPunchForce != Singleton<TrainerOptions>.Instance.AiPunchForce)
+            {
+                Singleton<TrainerOptions>.Instance.AiPunchForce = aiPunchForce;
+                SetBotStats();
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical(sliderStyle);
+            GUILayout.Label("Punch Time");
+            var aiPunchTime = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiPunchTime, 0.1f, 0.50f);
+            if(aiPunchTime != Singleton<TrainerOptions>.Instance.AiPunchTime)
+            {
+                Singleton<TrainerOptions>.Instance.AiPunchTime = aiPunchTime;
+                SetBotStats();
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical(sliderStyle);
+            GUILayout.Label("Speed");
+            var aiMovementForceMultiplier = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier, 2000f, 6000f);
+            if(aiMovementForceMultiplier != Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier)
+            {
+                Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier = aiMovementForceMultiplier;
+                SetBotStats();
+            }
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical(sliderStyle);
+            GUILayout.Label("Jump Height");
+            var aiMovementJumpForceMultiplier = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier, 25f, 100f);
+            if(aiMovementJumpForceMultiplier != Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier)
+            {
+                Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier = aiMovementJumpForceMultiplier;
+                SetBotStats();
+            }
+            GUILayout.EndVertical();
+
             GUILayout.EndHorizontal();
             GUILayout.Space(3);
 
@@ -500,10 +568,62 @@ public class TrainerManager : MonoBehaviour
         GetComponent<MultiplayerManager>().SendMessageToAllClients(array, P2PPackageHandler.MsgType.MapChange, false, 0UL, EP2PSend.k_EP2PSendReliable, 0);
     }
 
+    private void SetBotStats()
+    {
+        var playerControllers = new List<Controller>();
+        playerControllers.AddRange(hoardHandlerBrat.charactersAlive);
+        playerControllers.AddRange(hoardHandlerPlayer.charactersAlive);
+        playerControllers.AddRange(hoardHandlerZombie.charactersAlive);
+        playerControllers.AddRange(MultiplayerManager.mGameManager.controllerHandler.ActivePlayers);
+
+        foreach (var player in playerControllers)
+        {
+            if (player.isAI)
+            {
+                player.fighting.punchTime = Singleton<TrainerOptions>.Instance.AiPunchTime;
+                player.fighting.punchForce = Singleton<TrainerOptions>.Instance.AiPunchForce;
+                player.movement.forceMultiplier = Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier;
+                player.movement.jumpForceMultiplier = Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier;
+
+                // Set punch damage dealt by bots
+                var punchForceComponents = player.gameObject.GetComponentsInChildren<PunchForce>();
+                foreach (var punchForceComponent in punchForceComponents)
+                {
+                    punchForceComponent.damageMultiplier = Singleton<TrainerOptions>.Instance.AiDamageMultiplier;
+                }
+
+                if (player.gameObject.name == "ZombieCharacterArms(Clone)")
+                {
+                    // Set grab damage dealt by Zombie bots
+                    var reachForPlayerComponents = player.fighting.gameObject.GetComponentsInChildren<ReachForPlayer>();
+                    foreach (var reachForPlayerComponent in reachForPlayerComponents)
+                    {
+                        reachForPlayerComponent.damage = Singleton<TrainerOptions>.Instance.AiDamageMultiplier * 3f;
+                    }
+                }
+            } 
+            else
+            {
+                // Set weapon damage received from bots
+                var bodyPartComponents = player.gameObject.GetComponentsInChildren<BodyPart>();
+                foreach (var bodyPartComponent in bodyPartComponents)
+                {
+                    bodyPartComponent.multiplier = Singleton<TrainerOptions>.Instance.AiDamageMultiplier;
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Spawn an NPC that deals and takes damage. 
+    /// </summary>
     private void SpawnBotPlayer(GameObject playerPrefab)
     {
+        if(MultiplayerManager.mGameManager.controllerHandler.ActivePlayers.Count >= 4)
+        {
+            return;
+        }
+
         var spawnPosition = Vector3.up * 8f;
         var spawnRotation = Quaternion.identity;
         var playerId = MultiplayerManager.mGameManager.controllerHandler.ActivePlayers.Count;
@@ -579,6 +699,8 @@ public class TrainerManager : MonoBehaviour
         {
             MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerPlayer.character);
         }
+
+        SetBotStats();
     }
 
     private void SpawnBotEnemyZombie()
@@ -591,6 +713,8 @@ public class TrainerManager : MonoBehaviour
         {
             MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerZombie.character);
         }
+
+        SetBotStats();
     }
 
     private void SpawnBotEnemyBrat()
@@ -603,6 +727,8 @@ public class TrainerManager : MonoBehaviour
         {
             MultiplayerManager.mGameManager.hoardHandler.SpawnAI(hoardHandlerBrat.character);
         }
+
+        SetBotStats();
     }
 
     /// <summary>
