@@ -42,10 +42,10 @@
             this.lblGamePath = new System.Windows.Forms.Label();
             this.btnBrowseGamePath = new System.Windows.Forms.Button();
             this.panelBottomInfo = new System.Windows.Forms.Panel();
-            this.lblGameVersionDescription = new System.Windows.Forms.Label();
-            this.lblTrainerVersionDescription = new System.Windows.Forms.Label();
-            this.lblGameVersionValue = new System.Windows.Forms.Label();
             this.lblTrainerVersionValue = new System.Windows.Forms.Label();
+            this.lblGameVersionValue = new System.Windows.Forms.Label();
+            this.lblTrainerVersionDescription = new System.Windows.Forms.Label();
+            this.lblGameVersionDescription = new System.Windows.Forms.Label();
             this.panelGamePath = new StickFightTheGameTrainer.Controls.BorderedPanel();
             this.txtGamePath = new System.Windows.Forms.TextBox();
             this.contextMenuStripDeveloperTools.SuspendLayout();
@@ -207,25 +207,15 @@
             this.panelBottomInfo.Size = new System.Drawing.Size(763, 21);
             this.panelBottomInfo.TabIndex = 16;
             // 
-            // lblGameVersionDescription
+            // lblTrainerVersionValue
             // 
-            this.lblGameVersionDescription.AutoSize = true;
-            this.lblGameVersionDescription.ForeColor = System.Drawing.Color.DimGray;
-            this.lblGameVersionDescription.Location = new System.Drawing.Point(7, 3);
-            this.lblGameVersionDescription.Name = "lblGameVersionDescription";
-            this.lblGameVersionDescription.Size = new System.Drawing.Size(127, 13);
-            this.lblGameVersionDescription.TabIndex = 0;
-            this.lblGameVersionDescription.Text = "Detected game version:";
-            // 
-            // lblTrainerVersionDescription
-            // 
-            this.lblTrainerVersionDescription.AutoSize = true;
-            this.lblTrainerVersionDescription.ForeColor = System.Drawing.Color.DimGray;
-            this.lblTrainerVersionDescription.Location = new System.Drawing.Point(635, 3);
-            this.lblTrainerVersionDescription.Name = "lblTrainerVersionDescription";
-            this.lblTrainerVersionDescription.Size = new System.Drawing.Size(85, 13);
-            this.lblTrainerVersionDescription.TabIndex = 1;
-            this.lblTrainerVersionDescription.Text = "Trainer version:";
+            this.lblTrainerVersionValue.AutoSize = true;
+            this.lblTrainerVersionValue.ForeColor = System.Drawing.Color.DimGray;
+            this.lblTrainerVersionValue.Location = new System.Drawing.Point(716, 3);
+            this.lblTrainerVersionValue.Name = "lblTrainerVersionValue";
+            this.lblTrainerVersionValue.Size = new System.Drawing.Size(11, 13);
+            this.lblTrainerVersionValue.TabIndex = 10;
+            this.lblTrainerVersionValue.Text = "-";
             // 
             // lblGameVersionValue
             // 
@@ -237,15 +227,25 @@
             this.lblGameVersionValue.TabIndex = 9;
             this.lblGameVersionValue.Text = "-";
             // 
-            // lblTrainerVersionValue
+            // lblTrainerVersionDescription
             // 
-            this.lblTrainerVersionValue.AutoSize = true;
-            this.lblTrainerVersionValue.ForeColor = System.Drawing.Color.DimGray;
-            this.lblTrainerVersionValue.Location = new System.Drawing.Point(716, 3);
-            this.lblTrainerVersionValue.Name = "lblTrainerVersionValue";
-            this.lblTrainerVersionValue.Size = new System.Drawing.Size(11, 13);
-            this.lblTrainerVersionValue.TabIndex = 10;
-            this.lblTrainerVersionValue.Text = "-";
+            this.lblTrainerVersionDescription.AutoSize = true;
+            this.lblTrainerVersionDescription.ForeColor = System.Drawing.Color.DimGray;
+            this.lblTrainerVersionDescription.Location = new System.Drawing.Point(635, 3);
+            this.lblTrainerVersionDescription.Name = "lblTrainerVersionDescription";
+            this.lblTrainerVersionDescription.Size = new System.Drawing.Size(85, 13);
+            this.lblTrainerVersionDescription.TabIndex = 1;
+            this.lblTrainerVersionDescription.Text = "Trainer version:";
+            // 
+            // lblGameVersionDescription
+            // 
+            this.lblGameVersionDescription.AutoSize = true;
+            this.lblGameVersionDescription.ForeColor = System.Drawing.Color.DimGray;
+            this.lblGameVersionDescription.Location = new System.Drawing.Point(7, 3);
+            this.lblGameVersionDescription.Name = "lblGameVersionDescription";
+            this.lblGameVersionDescription.Size = new System.Drawing.Size(127, 13);
+            this.lblGameVersionDescription.TabIndex = 0;
+            this.lblGameVersionDescription.Text = "Detected game version:";
             // 
             // panelGamePath
             // 
@@ -285,6 +285,8 @@
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(781, 160);
+            this.MinimumSize = new System.Drawing.Size(781, 160);
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
