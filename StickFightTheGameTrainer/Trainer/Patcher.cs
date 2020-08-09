@@ -82,6 +82,11 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
+            if(_targetModule != null)
+            {
+                _targetModule.Dispose();
+            }
+
             _targetModule = ModuleDefMD.Load(targetModulePath);
 
             if (_targetModule == null)
@@ -1234,11 +1239,20 @@ namespace StickFightTheGameTrainer.Trainer
             }
         }
 
-        public async Task<string> GetGameVersion()
+        public async Task<string> GetGameVersion(string targetModulePath = null)
         {
+            if (string.IsNullOrWhiteSpace(targetModulePath) == false)
+            {
+                if(await LoadTargetModule(targetModulePath) == false)
+                {
+                    await _logger.Log("Could not get game version (1)");
+                    return string.Empty;
+                }
+            }
+
             if (_targetModule == null)
             {
-                await _logger.Log("Could not get game version (1)");
+                await _logger.Log("Could not get game version (2)");
                 return string.Empty;
             }
 
@@ -1247,7 +1261,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             if (targetStickFightConstantsTypeDef == null)
             {
-                await _logger.Log("Could not get game version (2)");
+                await _logger.Log("Could not get game version (3)");
                 return string.Empty;
             }
 
@@ -1256,7 +1270,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             if (targetGetVersionValueMethodDef?.Body?.Instructions == null || targetGetVersionValueMethodDef.Body?.Instructions.Any() == false)
             {
-                await _logger.Log("Could not get game version (3)");
+                await _logger.Log("Could not get game version (4)");
                 return string.Empty;
             }
 
@@ -1265,7 +1279,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             if (targetCurrentVersionInstruction?.Operand == null)
             {
-                await _logger.Log("Could not get game version (4)");
+                await _logger.Log("Could not get game version (5)");
                 return string.Empty;
             }
 
@@ -1274,7 +1288,7 @@ namespace StickFightTheGameTrainer.Trainer
 
             if (string.IsNullOrEmpty(targetCurrentVersionValue))
             {
-                await _logger.Log("Could not get game version (5)");
+                await _logger.Log("Could not get game version (6)");
                 return string.Empty;
             }
 

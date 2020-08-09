@@ -29,6 +29,7 @@ namespace StickFightTheGameTrainer
             _logger = logger;
             _patcher = patcher;
             _errorReportingForm = errorReportingForm;
+            lblTrainerVersionValue.Text = Application.ProductVersion;
 
             if (File.Exists(GameDirectories.CommonPath))
             {
@@ -46,6 +47,7 @@ namespace StickFightTheGameTrainer
         {
             _logger.ClearLogs();
             _errorReportingForm.Hide();
+            btnInstallMod.Enabled = false;
 
             var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
 
@@ -54,6 +56,7 @@ namespace StickFightTheGameTrainer
                 if (await _patcher.CheckTrainerAlreadyPatched())
                 {
                     MessageBox.Show("A patch is already installed on the specified target. Please restore a backup of your Assembly-CSharp.dll file or re-install the game.", "Installation detected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    btnInstallMod.Enabled = true;
                     return;
                 }
 
@@ -70,10 +73,12 @@ namespace StickFightTheGameTrainer
                     MessageBox.Show("The patch has been successfully installed");
                 }
 
+                btnInstallMod.Enabled = true;
                 progressBarInstallation.Visible = false;
             }
             else
             {
+                btnInstallMod.Enabled = true;
                 MessageBox.Show("Could not locate or load the target Assembly-CSharp.dll file.");
             }
         }
@@ -126,6 +131,12 @@ namespace StickFightTheGameTrainer
 
         private async void BtnRestoreBackup_Click(object sender, EventArgs e)
         {
+            if (progressBarInstallation.Visible)
+            {
+                MessageBox.Show("Installation is currently in progress.");
+                return;
+            }
+
             var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
 
             if (!await _patcher.RestoreLatestBackup(targetPath))
@@ -154,6 +165,17 @@ namespace StickFightTheGameTrainer
             
             btnInstallMod.Enabled = File.Exists(targetPath);
             btnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
+
+            if (btnInstallMod.Enabled)
+            {
+                await _patcher.LoadTargetModule(targetPath);
+                var gameVersion = await _patcher.GetGameVersion(targetPath);
+                lblGameVersionValue.Text = gameVersion.Length > 0 ? gameVersion : "-";
+            }
+            else
+            {
+                lblGameVersionValue.Text = "-";
+            }
         }
 
         private async void GenerateEncryptedSourcesAndKeysToolStripMenuItem_ClickAsync(object sender, EventArgs e)

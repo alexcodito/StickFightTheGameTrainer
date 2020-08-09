@@ -41,9 +41,15 @@
             this.btnDeveloperOptions = new System.Windows.Forms.Button();
             this.lblGamePath = new System.Windows.Forms.Label();
             this.btnBrowseGamePath = new System.Windows.Forms.Button();
+            this.panelBottomInfo = new System.Windows.Forms.Panel();
+            this.lblGameVersionDescription = new System.Windows.Forms.Label();
+            this.lblTrainerVersionDescription = new System.Windows.Forms.Label();
+            this.lblGameVersionValue = new System.Windows.Forms.Label();
+            this.lblTrainerVersionValue = new System.Windows.Forms.Label();
             this.panelGamePath = new StickFightTheGameTrainer.Controls.BorderedPanel();
             this.txtGamePath = new System.Windows.Forms.TextBox();
             this.contextMenuStripDeveloperTools.SuspendLayout();
+            this.panelBottomInfo.SuspendLayout();
             this.panelGamePath.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,7 +65,7 @@
             this.generateEncryptedSourcesAndKeysToolStripMenuItem,
             this.displayErrorReportingFormToolStripMenuItem});
             this.contextMenuStripDeveloperTools.Name = "contextMenuStrip1";
-            this.contextMenuStripDeveloperTools.Size = new System.Drawing.Size(336, 70);
+            this.contextMenuStripDeveloperTools.Size = new System.Drawing.Size(336, 48);
             // 
             // generateEncryptedSourcesAndKeysToolStripMenuItem
             // 
@@ -82,7 +88,7 @@
             this.checkBoxCreateBackup.AutoSize = true;
             this.checkBoxCreateBackup.Checked = true;
             this.checkBoxCreateBackup.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxCreateBackup.Location = new System.Drawing.Point(109, 70);
+            this.checkBoxCreateBackup.Location = new System.Drawing.Point(113, 70);
             this.checkBoxCreateBackup.Name = "checkBoxCreateBackup";
             this.checkBoxCreateBackup.Size = new System.Drawing.Size(99, 17);
             this.checkBoxCreateBackup.TabIndex = 7;
@@ -91,9 +97,9 @@
             // 
             // progressBarInstallation
             // 
-            this.progressBarInstallation.Location = new System.Drawing.Point(215, 73);
+            this.progressBarInstallation.Location = new System.Drawing.Point(165, 5);
             this.progressBarInstallation.Name = "progressBarInstallation";
-            this.progressBarInstallation.Size = new System.Drawing.Size(100, 11);
+            this.progressBarInstallation.Size = new System.Drawing.Size(218, 11);
             this.progressBarInstallation.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBarInstallation.TabIndex = 8;
             this.progressBarInstallation.Visible = false;
@@ -147,7 +153,7 @@
             this.btnDeveloperOptions.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDeveloperOptions.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnDeveloperOptions.ForeColor = System.Drawing.Color.Lime;
-            this.btnDeveloperOptions.Location = new System.Drawing.Point(538, 65);
+            this.btnDeveloperOptions.Location = new System.Drawing.Point(536, 65);
             this.btnDeveloperOptions.Name = "btnDeveloperOptions";
             this.btnDeveloperOptions.Size = new System.Drawing.Size(93, 26);
             this.btnDeveloperOptions.TabIndex = 11;
@@ -177,7 +183,7 @@
             this.btnBrowseGamePath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.btnBrowseGamePath.Image = global::StickFightTheGameTrainer.Properties.Resources.image_win_folder;
             this.btnBrowseGamePath.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnBrowseGamePath.Location = new System.Drawing.Point(672, 31);
+            this.btnBrowseGamePath.Location = new System.Drawing.Point(672, 30);
             this.btnBrowseGamePath.Name = "btnBrowseGamePath";
             this.btnBrowseGamePath.Size = new System.Drawing.Size(83, 25);
             this.btnBrowseGamePath.TabIndex = 14;
@@ -185,6 +191,61 @@
             this.btnBrowseGamePath.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnBrowseGamePath.UseVisualStyleBackColor = true;
             this.btnBrowseGamePath.Click += new System.EventHandler(this.BtnBrowseGamePath_Click);
+            // 
+            // panelBottomInfo
+            // 
+            this.panelBottomInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelBottomInfo.BackColor = System.Drawing.Color.Transparent;
+            this.panelBottomInfo.Controls.Add(this.lblTrainerVersionValue);
+            this.panelBottomInfo.Controls.Add(this.lblGameVersionValue);
+            this.panelBottomInfo.Controls.Add(this.lblTrainerVersionDescription);
+            this.panelBottomInfo.Controls.Add(this.lblGameVersionDescription);
+            this.panelBottomInfo.Controls.Add(this.progressBarInstallation);
+            this.panelBottomInfo.Location = new System.Drawing.Point(1, 96);
+            this.panelBottomInfo.Name = "panelBottomInfo";
+            this.panelBottomInfo.Size = new System.Drawing.Size(763, 21);
+            this.panelBottomInfo.TabIndex = 16;
+            // 
+            // lblGameVersionDescription
+            // 
+            this.lblGameVersionDescription.AutoSize = true;
+            this.lblGameVersionDescription.ForeColor = System.Drawing.Color.DimGray;
+            this.lblGameVersionDescription.Location = new System.Drawing.Point(7, 3);
+            this.lblGameVersionDescription.Name = "lblGameVersionDescription";
+            this.lblGameVersionDescription.Size = new System.Drawing.Size(127, 13);
+            this.lblGameVersionDescription.TabIndex = 0;
+            this.lblGameVersionDescription.Text = "Detected game version:";
+            // 
+            // lblTrainerVersionDescription
+            // 
+            this.lblTrainerVersionDescription.AutoSize = true;
+            this.lblTrainerVersionDescription.ForeColor = System.Drawing.Color.DimGray;
+            this.lblTrainerVersionDescription.Location = new System.Drawing.Point(635, 3);
+            this.lblTrainerVersionDescription.Name = "lblTrainerVersionDescription";
+            this.lblTrainerVersionDescription.Size = new System.Drawing.Size(85, 13);
+            this.lblTrainerVersionDescription.TabIndex = 1;
+            this.lblTrainerVersionDescription.Text = "Trainer version:";
+            // 
+            // lblGameVersionValue
+            // 
+            this.lblGameVersionValue.AutoSize = true;
+            this.lblGameVersionValue.ForeColor = System.Drawing.Color.DimGray;
+            this.lblGameVersionValue.Location = new System.Drawing.Point(133, 3);
+            this.lblGameVersionValue.Name = "lblGameVersionValue";
+            this.lblGameVersionValue.Size = new System.Drawing.Size(11, 13);
+            this.lblGameVersionValue.TabIndex = 9;
+            this.lblGameVersionValue.Text = "-";
+            // 
+            // lblTrainerVersionValue
+            // 
+            this.lblTrainerVersionValue.AutoSize = true;
+            this.lblTrainerVersionValue.ForeColor = System.Drawing.Color.DimGray;
+            this.lblTrainerVersionValue.Location = new System.Drawing.Point(716, 3);
+            this.lblTrainerVersionValue.Name = "lblTrainerVersionValue";
+            this.lblTrainerVersionValue.Size = new System.Drawing.Size(11, 13);
+            this.lblTrainerVersionValue.TabIndex = 10;
+            this.lblTrainerVersionValue.Text = "-";
             // 
             // panelGamePath
             // 
@@ -205,32 +266,33 @@
             this.txtGamePath.Size = new System.Drawing.Size(644, 15);
             this.txtGamePath.TabIndex = 0;
             this.txtGamePath.Text = "C:\\";
+            this.txtGamePath.TextChanged += new System.EventHandler(this.TxtGamePath_TextChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(765, 100);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(250)))));
+            this.ClientSize = new System.Drawing.Size(765, 121);
+            this.Controls.Add(this.panelBottomInfo);
             this.Controls.Add(this.btnBrowseGamePath);
             this.Controls.Add(this.lblGamePath);
             this.Controls.Add(this.panelGamePath);
             this.Controls.Add(this.btnDeveloperOptions);
             this.Controls.Add(this.btnRestoreBackup);
             this.Controls.Add(this.btnInstallMod);
-            this.Controls.Add(this.progressBarInstallation);
             this.Controls.Add(this.checkBoxCreateBackup);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(781, 139);
-            this.MinimumSize = new System.Drawing.Size(781, 139);
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Stick Fight: The Game - Trainer by loxa";
             this.contextMenuStripDeveloperTools.ResumeLayout(false);
+            this.panelBottomInfo.ResumeLayout(false);
+            this.panelBottomInfo.PerformLayout();
             this.panelGamePath.ResumeLayout(false);
             this.panelGamePath.PerformLayout();
             this.ResumeLayout(false);
@@ -252,6 +314,11 @@
         private System.Windows.Forms.Label lblGamePath;
         private System.Windows.Forms.Button btnBrowseGamePath;
         private System.Windows.Forms.ToolStripMenuItem displayErrorReportingFormToolStripMenuItem;
+        private System.Windows.Forms.Panel panelBottomInfo;
+        private System.Windows.Forms.Label lblTrainerVersionDescription;
+        private System.Windows.Forms.Label lblGameVersionDescription;
+        private System.Windows.Forms.Label lblTrainerVersionValue;
+        private System.Windows.Forms.Label lblGameVersionValue;
     }
 }
 
