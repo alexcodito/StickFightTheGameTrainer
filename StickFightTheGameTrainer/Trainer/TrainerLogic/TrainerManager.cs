@@ -9,6 +9,7 @@ using Steamworks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using InControl;
+using System.Diagnostics;
 
 public class TrainerManager : MonoBehaviour
 {
@@ -505,7 +506,7 @@ public class TrainerManager : MonoBehaviour
     {
         var spawnPosition = Vector3.up * 8f;
         var spawnRotation = Quaternion.identity;
-        var playerId = MultiplayerManager.mGameManager.controllerHandler.players.Count;
+        var playerId = MultiplayerManager.mGameManager.controllerHandler.ActivePlayers.Count;
         var playerColors = MultiplayerManagerAssets.Instance.Colors;
         var playerObject = UnityEngine.Object.Instantiate<GameObject>(playerPrefab, spawnPosition, spawnRotation);
         var playerController = playerObject.GetComponent<Controller>();
@@ -522,12 +523,13 @@ public class TrainerManager : MonoBehaviour
         }
 
         var playerLineRenderers = playerObject.GetComponentsInChildren<LineRenderer>();
-        for (int i = 0; i < playerLineRenderers.Length; i++)
+        for (var i = 0; i < playerLineRenderers.Length; i++)
         {
             playerLineRenderers[i].sharedMaterial = playerColors[playerId];
         }
 
-        foreach (var spriteRenderer in playerObject.GetComponentsInChildren<SpriteRenderer>())
+        var playerSpriteRenderers = playerObject.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var spriteRenderer in playerSpriteRenderers)
         {
             if (spriteRenderer.transform.tag != "DontChangeColor")
             {
