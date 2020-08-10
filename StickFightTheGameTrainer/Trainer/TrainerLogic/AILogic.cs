@@ -206,7 +206,7 @@ public class AILogic : AI
             if (weaponPickUp && weaponPickUp.transform.position.y < 10f && controller.fighting.weapon == null)
             {
                 // Ensure that the AI has this type of weapon and can pick it up (some AI prefabs have less weapons than others).
-                if(weaponPickUp.id <= this.controller.fighting.weapons.transform.childCount)
+                if(weaponPickUp.id < this.controller.fighting.weapons.transform.childCount)
                 {
                     target = weaponPickUp.GetComponent<Rigidbody>();
                     return;
