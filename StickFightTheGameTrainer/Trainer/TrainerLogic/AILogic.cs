@@ -176,20 +176,26 @@ public class AILogic : AI
                     }
                 }
 
-                // Perform an attack
-                if (Vector3.Distance(head.position, targetPosition) < currentAttackRange && targetPosition.y - head.position.y < heightRange)
+                var cubeLayerBitMask = 1 << 23; // Cube bitmask
+                RaycastHit cubeHit;
+                // Check that the target is in direct line of sight and not obstructed by a wall (cube)
+                if (Physics.Linecast(head.position, targetPosition, out cubeHit, cubeLayerBitMask) == false)
                 {
-                    reactionCounter += Time.deltaTime;
-
-                    if (reactionCounter > reactionTime)
+                    // Perform an attack if the target is still present and is within range
+                    if (target && Vector3.Distance(head.position, targetPosition) < currentAttackRange && targetPosition.y - head.position.y < heightRange)
                     {
-                        reactionCounter = 0f;
-                        controller.Attack();
+                        reactionCounter += Time.deltaTime;
+
+                        if (reactionCounter > reactionTime)
+                        {
+                            reactionCounter = 0f;
+                            controller.Attack();
+                        }
                     }
-                }
-                else if (reactionCounter > 0f)
-                {
-                    reactionCounter -= Time.deltaTime;
+                    else if (reactionCounter > 0f)
+                    {
+                        reactionCounter -= Time.deltaTime;
+                    }
                 }
             }
         }
@@ -206,11 +212,11 @@ public class AILogic : AI
             if (weaponPickUp && weaponPickUp.transform.position.y < 10f && controller.fighting.weapon == null)
             {
                 // Ensure that the AI has this type of weapon and can pick it up (some AI prefabs have less weapons than others).
-                if(weaponPickUp.id < this.controller.fighting.weapons.transform.childCount)
+                if (weaponPickUp.id < this.controller.fighting.weapons.transform.childCount)
                 {
                     target = weaponPickUp.GetComponent<Rigidbody>();
                     return;
-                }                
+                }
             }
 
             // Find a PC / player to attack
