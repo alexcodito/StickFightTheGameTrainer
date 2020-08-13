@@ -14,6 +14,7 @@ using System.Diagnostics;
 public class TrainerManager : MonoBehaviour
 {
     private float _deltaTime;
+    private float _keyHoldTime;
     private int _playerCount;
     private bool _isCoroutineExecuting;
     private MapWrapper _currentMap;
@@ -107,7 +108,7 @@ public class TrainerManager : MonoBehaviour
             {
                 padding = new RectOffset(5, 5, 5, 5)
             };
-            
+
             var sliderStyle = new GUIStyle()
             {
                 padding = new RectOffset(8, 8, 0, 0)
@@ -240,11 +241,11 @@ public class TrainerManager : MonoBehaviour
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal(horizontalToggleGroupStyle, GUILayout.Width(170));
-            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiAggressiveEnabled, " Aggressive", toggleStyle, GUILayout.Width(95)) != Singleton<TrainerOptions>.Instance.AiAggressiveEnabled)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiAggressiveEnabled, " Aggressive", toggleStyle, GUILayout.Width(95)) != Singleton<TrainerOptions>.Instance.AiAggressiveEnabled)
             {
                 Singleton<TrainerOptions>.Instance.AiAggressiveEnabled = !Singleton<TrainerOptions>.Instance.AiAggressiveEnabled;
             }
-            if(GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiNormalEnabled, " Normal", toggleStyle, GUILayout.Width(60)) != Singleton<TrainerOptions>.Instance.AiNormalEnabled)
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.AiNormalEnabled, " Normal", toggleStyle, GUILayout.Width(60)) != Singleton<TrainerOptions>.Instance.AiNormalEnabled)
             {
                 Singleton<TrainerOptions>.Instance.AiNormalEnabled = !Singleton<TrainerOptions>.Instance.AiNormalEnabled;
             }
@@ -258,7 +259,7 @@ public class TrainerManager : MonoBehaviour
             GUILayout.BeginVertical(sliderStyle);
             GUILayout.Label("Damage");
             var aiDamageMultiplier = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiDamageMultiplier, 1f, 5f);
-            if(aiDamageMultiplier != Singleton<TrainerOptions>.Instance.AiDamageMultiplier)
+            if (aiDamageMultiplier != Singleton<TrainerOptions>.Instance.AiDamageMultiplier)
             {
                 Singleton<TrainerOptions>.Instance.AiDamageMultiplier = aiDamageMultiplier;
                 SetBotStats();
@@ -268,7 +269,7 @@ public class TrainerManager : MonoBehaviour
             GUILayout.BeginVertical(sliderStyle);
             GUILayout.Label("Punch Force");
             var aiPunchForce = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiPunchForce, 120000f, 800000f);
-            if(aiPunchForce != Singleton<TrainerOptions>.Instance.AiPunchForce)
+            if (aiPunchForce != Singleton<TrainerOptions>.Instance.AiPunchForce)
             {
                 Singleton<TrainerOptions>.Instance.AiPunchForce = aiPunchForce;
                 SetBotStats();
@@ -278,7 +279,7 @@ public class TrainerManager : MonoBehaviour
             GUILayout.BeginVertical(sliderStyle);
             GUILayout.Label("Punch Time");
             var aiPunchTime = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiPunchTime, 0.1f, 0.50f);
-            if(aiPunchTime != Singleton<TrainerOptions>.Instance.AiPunchTime)
+            if (aiPunchTime != Singleton<TrainerOptions>.Instance.AiPunchTime)
             {
                 Singleton<TrainerOptions>.Instance.AiPunchTime = aiPunchTime;
                 SetBotStats();
@@ -288,7 +289,7 @@ public class TrainerManager : MonoBehaviour
             GUILayout.BeginVertical(sliderStyle);
             GUILayout.Label("Speed");
             var aiMovementForceMultiplier = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier, 2000f, 6000f);
-            if(aiMovementForceMultiplier != Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier)
+            if (aiMovementForceMultiplier != Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier)
             {
                 Singleton<TrainerOptions>.Instance.AiMovementForceMultiplier = aiMovementForceMultiplier;
                 SetBotStats();
@@ -298,7 +299,7 @@ public class TrainerManager : MonoBehaviour
             GUILayout.BeginVertical(sliderStyle);
             GUILayout.Label("Jump Height");
             var aiMovementJumpForceMultiplier = GUILayout.HorizontalSlider(Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier, 25f, 100f);
-            if(aiMovementJumpForceMultiplier != Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier)
+            if (aiMovementJumpForceMultiplier != Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier)
             {
                 Singleton<TrainerOptions>.Instance.AiMovementJumpForceMultiplier = aiMovementJumpForceMultiplier;
                 SetBotStats();
@@ -348,7 +349,7 @@ public class TrainerManager : MonoBehaviour
 
         if (Singleton<TrainerOptions>.Instance.CheatsEnabled)
         {
-            if(MultiplayerManager.mGameManager != null && MultiplayerManager.mGameManager.controllerHandler != null && MultiplayerManager.mGameManager.controllerHandler.players != null)
+            if (MultiplayerManager.mGameManager != null && MultiplayerManager.mGameManager.controllerHandler != null && MultiplayerManager.mGameManager.controllerHandler.players != null)
             {
                 // Display healthbars and scores for all players
                 foreach (var player in MultiplayerManager.mGameManager.controllerHandler.players)
@@ -461,65 +462,87 @@ public class TrainerManager : MonoBehaviour
                         }
 
                         // Select next weapon for the requesting player
-                        if (!ChatManager.isTyping && (controller.mPlayerActions.activeDevice.DPadLeft.WasReleased || (Input.GetKeyUp(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any))))
+                        if (!ChatManager.isTyping && (controller.mPlayerActions.activeDevice.DPadLeft.IsPressed || (Input.GetKey(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any))))
                         {
-                            if (controller.fighting.TrainerWeaponIndex <= 0)
-                            {
-                                controller.fighting.TrainerWeaponIndex = controller.fighting.weapons.transform.childCount;
-                            }
-                            else
-                            {
-                                var trainerWeaponIndex = controller.fighting.TrainerWeaponIndex;
-                                controller.fighting.TrainerWeaponIndex = trainerWeaponIndex - 1;
-                            }
+                            // Keep track of how long the key is pressed down for.
+                            _keyHoldTime += Time.deltaTime;
 
-                            controller.fighting.Dissarm();
-                            controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
-
-                            // Add a dot after the weapon number
-                            if (controller.fighting != null && controller.fighting.weapon != null && controller.fighting.weapon.name != null)
+                            // Action if the key was just pressed or has been held for a certain amount of time (fast / continuous scroll)
+                            if (Input.GetKeyDown(KeyCode.Q) || controller.mPlayerActions.activeDevice.DPadLeft.WasPressed || _keyHoldTime > 0.5f)
                             {
-                                var weaponName = controller.fighting.weapon.name;
-
-                                if (weaponName.IndexOf(" ") > -1)
+                                if (controller.fighting.TrainerWeaponIndex <= 0)
                                 {
-                                    weaponName = weaponName.Insert(weaponName.IndexOf(" "), ".");
+                                    controller.fighting.TrainerWeaponIndex = controller.fighting.weapons.transform.childCount;
+                                }
+                                else
+                                {
+                                    var trainerWeaponIndex = controller.fighting.TrainerWeaponIndex;
+                                    controller.fighting.TrainerWeaponIndex = trainerWeaponIndex - 1;
                                 }
 
-                                // Announce selected weapon name
-                                controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                controller.fighting.Dissarm();
+                                controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
+
+                                // Add a dot after the weapon number
+                                if (controller.fighting != null && controller.fighting.weapon != null && controller.fighting.weapon.name != null)
+                                {
+                                    var weaponName = controller.fighting.weapon.name;
+
+                                    if (weaponName.IndexOf(" ") > -1)
+                                    {
+                                        weaponName = weaponName.Insert(weaponName.IndexOf(" "), ".");
+                                    }
+
+                                    // Announce selected weapon name
+                                    controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                }
                             }
+                        }
+                        else if ((Input.GetKeyUp(KeyCode.Q) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)) || controller.mPlayerActions.activeDevice.DPadLeft.WasReleased)
+                        {
+                            _keyHoldTime = 0f;
                         }
 
                         // Select previous weapon for the requesting player
-                        if (!ChatManager.isTyping && (controller.mPlayerActions.activeDevice.DPadRight.WasReleased || (Input.GetKeyUp(KeyCode.E) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any))))
+                        if (!ChatManager.isTyping && (controller.mPlayerActions.activeDevice.DPadRight.IsPressed || (Input.GetKey(KeyCode.E) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any))))
                         {
-                            if (controller.fighting.weapons.transform.childCount <= controller.fighting.TrainerWeaponIndex)
-                            {
-                                controller.fighting.TrainerWeaponIndex = 0;
-                            }
-                            else
-                            {
-                                int trainerWeaponIndex2 = controller.fighting.TrainerWeaponIndex;
-                                controller.fighting.TrainerWeaponIndex = trainerWeaponIndex2 + 1;
-                            }
+                            // Keep track of how long the key is pressed down for.
+                            _keyHoldTime += Time.deltaTime;
 
-                            controller.fighting.Dissarm();
-                            controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
-
-                            // Add a dot after the weapon number
-                            if (controller.fighting != null && controller.fighting.weapon != null && controller.fighting.weapon.name != null)
+                            // Action if the key was just pressed or has been held for a certain amount of time (fast / continuous scroll)
+                            if (Input.GetKeyDown(KeyCode.E) || controller.mPlayerActions.activeDevice.DPadRight.WasPressed || _keyHoldTime > 0.5f)
                             {
-                                var weaponName = controller.fighting.weapon.name;
-
-                                if (weaponName.IndexOf(" ") > -1)
+                                if (controller.fighting.weapons.transform.childCount <= controller.fighting.TrainerWeaponIndex)
                                 {
-                                    weaponName = weaponName.Insert(weaponName.IndexOf(" "), ".");
+                                    controller.fighting.TrainerWeaponIndex = 0;
+                                }
+                                else
+                                {
+                                    int trainerWeaponIndex2 = controller.fighting.TrainerWeaponIndex;
+                                    controller.fighting.TrainerWeaponIndex = trainerWeaponIndex2 + 1;
                                 }
 
-                                // Announce selected weapon name
-                                controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                controller.fighting.Dissarm();
+                                controller.fighting.NetworkPickUpWeapon((byte)controller.fighting.TrainerWeaponIndex);
+
+                                // Add a dot after the weapon number
+                                if (controller.fighting != null && controller.fighting.weapon != null && controller.fighting.weapon.name != null)
+                                {
+                                    var weaponName = controller.fighting.weapon.name;
+
+                                    if (weaponName.IndexOf(" ") > -1)
+                                    {
+                                        weaponName = weaponName.Insert(weaponName.IndexOf(" "), ".");
+                                    }
+
+                                    // Announce selected weapon name
+                                    controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                }
                             }
+                        }
+                        else if ((Input.GetKeyUp(KeyCode.E) && (controller.mPlayerActions.mInputType == InputType.Keyboard || controller.mPlayerActions.mInputType == InputType.Any)) || controller.mPlayerActions.activeDevice.DPadRight.WasReleased)
+                        {
+                            _keyHoldTime = 0f;
                         }
                     }
                 }
@@ -601,7 +624,7 @@ public class TrainerManager : MonoBehaviour
                         reachForPlayerComponent.damage = Singleton<TrainerOptions>.Instance.AiDamageMultiplier * 3f;
                     }
                 }
-            } 
+            }
             else
             {
                 // Set weapon damage received from bots
@@ -619,7 +642,7 @@ public class TrainerManager : MonoBehaviour
     /// </summary>
     private void SpawnBotPlayer(GameObject playerPrefab)
     {
-        if(MultiplayerManager.mGameManager.controllerHandler.ActivePlayers.Count >= 4)
+        if (MultiplayerManager.mGameManager.controllerHandler.ActivePlayers.Count >= 4)
         {
             return;
         }
