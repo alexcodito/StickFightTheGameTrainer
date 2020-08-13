@@ -5,15 +5,15 @@ Injecting IL code directly into the game's Assembly-CSharp.dll file allows this 
 
 ### Features (+12)
 
-- No Recoil
-- Full Auto
+- No recoil
+- Full auto
 - Scoreboard
-- Flying Mode
-- Skip Map/Boss
+- Flying mode
+- Skip map/boss
 - Display health
-- Uncap Fire-rate
+- Uncap fire-rate
 - Unlimited health
-- Unlimited Ammunition
+- Unlimited ammunition
 - Spawn weapon on demand (extra weapons)
 - Browse and select weapons (extra weapons)
 - Spawn different AI Bots / Single Player mode
@@ -38,17 +38,20 @@ As a basic tampering prevention measure, the raw source files are encrypted with
 A utility is available when the VS project is built in `Debug` mode to assist with this task. Pressing the `Dev. Options` button brings up the `Generate encrypted Logic Module sources & keys` option. 
 This will load the three relevant `.cs` files and generate correspondingly named `.data` files, along with two additional files called `iv.data` and `key.data`.
 
-![Dev. Options](https://i.imgur.com/gq9i8j9.png "Dev. Options")
+![Dev. Options](Reference/Media/sf-trainer-dev-options.png "Dev. Options")
 
 Finally, the generated data must be *hard coded* within the `StickFightTheGameTrainer.Trainer.TrainerLogic.TrainerLogicModule` static class. While this is far from ideal,
 it prevents script-kiddies from enabling cheats in online public lobbies.
 
+Please note that when installing the patch in `Release` mode, the target assembly is additionally obfuscated with the use of ConfuserEx.
+
 ### Installation
 
-1) Run the trainer .exe program.
-2) Specify the path to your Stick Fight The Game installation folder.
+1) Unzip / extract the downloaded .zip file.
+2) Run the extracted trainer .exe program.
+3) Specify the path to your Stick Fight The Game installation folder.
 - Most common Steam location: `C:\Program Files (x86)\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed`
-3) Press `Install Mod` button.
+4) Press `Install Mod` button.
 
 ### Controls
 ##### PC Keyboard
@@ -67,13 +70,16 @@ it prevents script-kiddies from enabling cheats in online public lobbies.
 
 ### Notes
 
-    - Quickly pressing and releasing shortcut buttons simultaneously works best.
     - The scoreboard displays wins (i.e. how many rounds you wear the crown for).
     - When you skip a level, no one wins the round.
     - This mod will only activate if you're playing locally or with other players that have it installed.
     - HP bars always display 100, even if your health is set to 300. Damage is scaled relatively.
 
 ### Release Information
+
+##### Version 1.0.0.3 (Game version v1.2.06 and above)
+- Improved AI logic.
+- Hold weapon selection shortcuts to browse quickly.
 
 ##### Version 1.0.0.2 (Game version v1.2.06 and above)
 - Added AI Bots / Single Player mode.
