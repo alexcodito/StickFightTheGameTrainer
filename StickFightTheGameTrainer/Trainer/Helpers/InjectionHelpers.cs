@@ -3,20 +3,12 @@ using dnlib.DotNet.Emit;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace StickFightTheGameTrainer.Trainer.Helpers
 {
-    public class InjectionHelpers
+    public static class InjectionHelpers
     {
-        private readonly Common.ILogger _logger;
-
-        public InjectionHelpers(Common.ILogger logger)
-        {
-            _logger = logger;
-        }
-
-        public void Save(ModuleDefMD targetModule)
+        public static void Save(ModuleDefMD targetModule)
         {
             var targetLocation = targetModule.Location;
 
@@ -34,7 +26,7 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             }
         }
 
-        public bool AddTypeToModule(TypeDef typeDef, ModuleDefMD moduleDefMdTarget, bool overwrite = false, bool detachFromSourceModuleTypes = true)
+        public static bool AddTypeToModule(TypeDef typeDef, ModuleDefMD moduleDefMdTarget, bool overwrite = false, bool detachFromSourceModuleTypes = true)
         {
             if (typeDef == null || moduleDefMdTarget == null)
             {
@@ -64,7 +56,7 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             return true;
         }
 
-        public bool RemoveTypeFromModule(string typeName, ModuleDefMD moduleDefMdTarget)
+        public static bool RemoveTypeFromModule(string typeName, ModuleDefMD moduleDefMdTarget)
         {
             if (typeName == null || moduleDefMdTarget == null)
             {
@@ -82,22 +74,20 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             return false;
         }
 
-        public async Task ClearMethodBody(ModuleDefMD moduleDef, string typeDefName, string methodDefName)
+        public static bool ClearMethodBody(ModuleDefMD moduleDef, string typeDefName, string methodDefName)
         {
             var typeDef = moduleDef.Find(typeDefName, true);
 
             if (typeDef == null)
             {
-                await _logger.Log($"Could not clear method body: Type def '{typeDefName}' could not be located");
-                return;
+                return false;
             }
 
             var methodDef = typeDef.FindMethod(methodDefName);
 
             if (methodDef == null)
             {
-                await _logger.Log($"Could not clear method body: Method def '{methodDefName}' could not be located");
-                return;
+                return false;
             }
 
             if (methodDef.Body == null)
@@ -107,9 +97,11 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
 
             methodDef.Body.Instructions.Clear();
             methodDef.Body.Instructions.Add(new Instruction(OpCodes.Ret));
+
+            return true;
         }
 
-        public bool AddMethodToType(MethodDef methodDef, TypeDef typeDefTarget, bool overwrite = false, bool detachFromSourceModuleTypes = true)
+        public static bool AddMethodToType(MethodDef methodDef, TypeDef typeDefTarget, bool overwrite = false, bool detachFromSourceModuleTypes = true)
         {
             if (methodDef == null || typeDefTarget == null)
             {
@@ -139,56 +131,55 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             return true;
         }
 
-        public async Task SetFieldAccessModifier(ModuleDefMD module, string typeDefName, string fieldName, FieldAttributes fieldAttribute, bool isReflectionName = true)
+        public static bool SetFieldAccessModifier(ModuleDefMD module, string typeDefName, string fieldName, FieldAttributes fieldAttribute, bool isReflectionName = true)
         {
             var typeDef = module.Find(typeDefName, isReflectionName);
 
             if (typeDef == null)
             {
-                await _logger.Log($"Set Field Access Modifier: Type def not found: {typeDefName}");
-                return;
+                return false;
             }
 
             var fieldDef = typeDef.FindField(fieldName);
 
             if (fieldDef == null)
             {
-                await _logger.Log($"Set Field Access Modifier: Field def not found: {fieldName}");
-                return;
+                return false;
             }
 
             fieldDef.Access = fieldAttribute;
+
+            return true;
         }
 
-        public async Task SetMethodAccessModifier(ModuleDefMD module, string typeDefName, string methodName, MethodAttributes methodAttribute)
+        public static bool SetMethodAccessModifier(ModuleDefMD module, string typeDefName, string methodName, MethodAttributes methodAttribute)
         {
             var typeDef = module.Find(typeDefName, true);
 
             if (typeDef == null)
             {
-                await _logger.Log($"Set Method Access Modifier: Type def not found: {typeDefName}");
-                return;
+                return false;
             }
 
             var methodDef = typeDef.FindMethod(methodName);
 
             if (methodDef == null)
             {
-                await _logger.Log($"Set Method Access Modifier: Method def not found: {methodName}");
-                return;
+                return false;
             }
 
             methodDef.Access = methodAttribute;
+
+            return true;
         }
 
-        public async Task AddField(ModuleDefMD module, string typeDefName, string fieldName, TypeSig type, FieldAttributes fieldAttributeLeft, FieldAttributes fieldAttributeRight)
+        public static bool AddField(ModuleDefMD module, string typeDefName, string fieldName, TypeSig type, FieldAttributes fieldAttributeLeft, FieldAttributes fieldAttributeRight)
         {
             var typeDef = module.Find(typeDefName, true);
 
             if (typeDef == null)
             {
-                await _logger.Log($"Add Field: Type def not found: {typeDefName}");
-                return;
+                return false;
             }
 
             var fieldDef = new FieldDefUser(fieldName,
@@ -201,17 +192,18 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             }
             else
             {
-                await _logger.Log($"Add Field: Field name '{fieldName}' already exists in type '{typeDefName}'");
+                return false;
             }
+
+            return true;
         }
 
-        public async Task<FieldDef> AddField(ModuleDefMD module, string typeDefName, string fieldName, TypeSig type, FieldAttributes fieldAttributeLeft)
+        public static FieldDef AddField(ModuleDefMD module, string typeDefName, string fieldName, TypeSig type, FieldAttributes fieldAttributeLeft)
         {
             var typeDef = module.Find(typeDefName, true);
 
             if (typeDef == null)
             {
-                await _logger.Log($"Add Field: Type def not found: {typeDefName}");
                 return null;
             }
 
@@ -222,46 +214,41 @@ namespace StickFightTheGameTrainer.Trainer.Helpers
             var existingTypeDef = typeDef.Fields.FirstOrDefault(field => field.Name == fieldName);
             if (existingTypeDef != null)
             {
-                await _logger.Log($"Add Field: Field name '{fieldName}' already exists in type '{typeDefName}'");
                 return existingTypeDef;
             }
 
             typeDef.Fields.Add(fieldDef);
 
-            return await Task.FromResult(fieldDef);
+            return fieldDef;
         }
 
-        public async Task<PropertyDef> AddProperty(ModuleDefMD module, string typeDefName, string propertyName, PropertySig type, PropertyAttributes propertyAttributeLeft)
+        public static PropertyDef AddProperty(ModuleDefMD module, string typeDefName, string propertyName, PropertySig type, PropertyAttributes propertyAttributeLeft)
         {
             var typeDef = module.Find(typeDefName, true);
 
             if (typeDef == null)
             {
-                await _logger.Log($"Add Property: Type def not found: {typeDefName}");
                 return null;
             }
 
-            var propertyDef = new PropertyDefUser(propertyName,
-                type,
-                propertyAttributeLeft);
+            var propertyDef = new PropertyDefUser(propertyName, type, propertyAttributeLeft);
 
             var existingTypeDef = typeDef.Properties.FirstOrDefault(property => property.Name == propertyName);
             if (existingTypeDef != null)
             {
-                await _logger.Log($"Add Property: Property name '{propertyName}' already exists in type '{typeDefName}'");
                 return existingTypeDef;
             }
 
             typeDef.Properties.Add(propertyDef);
 
-            return await Task.FromResult(propertyDef);
+            return propertyDef;
         }
 
         /// <summary>
         /// Find all references to a TypeDef and replace them with another TypeDef.
         /// Note that field and method references from the source TypeDef will also need to be replaced serparately.
         /// </summary>
-        public void ReplaceAllTypeDefReferences(TypeDef sourceTypeDef, TypeDef destinationTypeDef, ModuleDefMD moduleDefMd)
+        public static void ReplaceAllTypeDefReferences(TypeDef sourceTypeDef, TypeDef destinationTypeDef, ModuleDefMD moduleDefMd)
         {
             var types = moduleDefMd.GetTypes();
 
