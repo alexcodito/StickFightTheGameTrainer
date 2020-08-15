@@ -9,9 +9,12 @@ namespace StickFightTheGameTrainer.Common
     {
         private readonly IList<LogMessage> _currentLogs;
         public event Action<LogMessage> NewLogEvent;
+        public event Action ClearLogsEvent;
         public static readonly Task CompletedTask = Task.FromResult(0);
 
         public bool HasErrors => _currentLogs?.Any(log => log.LogLevel == LogLevel.Error) == true;
+        
+        public bool HasWarnings => _currentLogs?.Any(log => log.LogLevel == LogLevel.Warning) == true;
 
         public Logger()
         {
@@ -55,6 +58,7 @@ namespace StickFightTheGameTrainer.Common
         public void ClearLogs()
         {
             _currentLogs.Clear();
+            ClearLogsEvent?.Invoke();
         }
 
         public IList<LogMessage> GetLogs()

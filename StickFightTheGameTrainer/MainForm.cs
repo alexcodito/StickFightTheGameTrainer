@@ -62,17 +62,34 @@ namespace StickFightTheGameTrainer
 
                 progressBarInstallation.Visible = true;
 
-                if (!await _patcher.PatchTargetModule(checkBoxCreateBackup.Checked) || _logger.HasErrors)
+                if (!await _patcher.PatchTargetModule(checkBoxCreateBackup.Checked))
                 {
-                    _errorReportingForm.GenerateLogReport();
-                    _errorReportingForm.Show();
+                    if (_logger.HasErrors)
+                    {
+                        _errorReportingForm.GenerateLogReport();
+                        _errorReportingForm.Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("An unspecified error has occurred.");
+                    }
                 }
                 else
                 {
-                    btnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
-                    MessageBox.Show("The patch has been successfully installed");
+                    if (_logger.HasWarnings)
+                    {
+                        MessageBox.Show("The patch has been installed with some warnings. Some features may not work correctly.");
+                        _errorReportingForm.GenerateLogReport();
+                        _errorReportingForm.Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("The patch has been successfully installed.");
+                    }
                 }
 
+                _patcher.UnloadTargetModule();
+                btnRestoreBackup.Enabled = await _patcher.CheckBackupExists(targetPath);
                 btnInstallMod.Enabled = true;
                 progressBarInstallation.Visible = false;
             }

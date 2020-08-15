@@ -7,8 +7,12 @@ namespace StickFightTheGameTrainer.Common
     public interface ILogger
     {
         event Action<LogMessage> NewLogEvent;
+        
+        event Action ClearLogsEvent;
 
         bool HasErrors { get; }
+        
+        bool HasWarnings { get; }
 
         void ClearLogs();
 

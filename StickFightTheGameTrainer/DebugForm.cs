@@ -21,6 +21,7 @@ namespace StickFightTheGameTrainer
             InitializeComponent();
             _logger = logger;
             _logger.NewLogEvent += NewEventLogHandler;
+            _logger.ClearLogsEvent += () => txtDebugLog.Clear();
         }
 
         private void NewEventLogHandler(LogMessage logMessage)
