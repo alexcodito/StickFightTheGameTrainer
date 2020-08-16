@@ -122,7 +122,8 @@
     <Compile Include="ErrorReportingForm.Designer.cs">
       <DependentUpon>ErrorReportingForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Obfuscation\ProtectionUtilities.cs" />
+    <Compile Include="Obfuscation\AssemblyProtectionUtilities.cs" />
+    <Compile Include="Obfuscation\TrainerProtectionUtilities.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

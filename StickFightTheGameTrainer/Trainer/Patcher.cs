@@ -20,7 +20,7 @@ namespace StickFightTheGameTrainer.Trainer
         private ModuleDefMD _logicModule;
         private ModuleDefMD _targetModule;
         private string _targetModulePath;
-        private readonly ProtectionUtilities _protectionUtilities;
+        private readonly AssemblyProtectionUtilities _protectionUtilities;
         private readonly Common.ILogger _logger;
         private readonly TrainerLogicModuleBuilder _trainerLogicModuleBuilder;
 
@@ -68,7 +68,7 @@ namespace StickFightTheGameTrainer.Trainer
             new KeyValuePair<string, string>("MultiplayerManager", "SendMessageToAllClients"),
         };
 
-        public Patcher(Common.ILogger logger, TrainerLogicModuleBuilder trainerLogicModuleBuilder, ProtectionUtilities protectionUtilities)
+        public Patcher(Common.ILogger logger, TrainerLogicModuleBuilder trainerLogicModuleBuilder, AssemblyProtectionUtilities protectionUtilities)
         {
             _logger = logger;
             _trainerLogicModuleBuilder = trainerLogicModuleBuilder;
@@ -433,14 +433,24 @@ namespace StickFightTheGameTrainer.Trainer
                 await _logger.Log($"Could not add bot chat messages: {patchingStatus}", LogLevel.Warning);
             }
 
-            SaveAndReloadTargetModule(false);
+            SaveAndReloadTargetModule();
 
 #if !DEBUG
-            await _logger.Log("Protecting module");
+            await _logger.Log("Protecting assembly");
 
-            if (await _protectionUtilities.ProtectAssembly(_targetModulePath) == false)
+            patchingStatus = await TrainerProtectionUtilities.ObfuscateTrainer(_targetModule);
+
+            if (patchingStatus > 0)
             {
-                await _logger.Log("Could not protect module", LogLevel.Error);
+                await _logger.Log($"Could not obfuscate trainer: {patchingStatus}", LogLevel.Error);
+                return await Task.FromResult(false);
+            }
+
+            SaveAndReloadTargetModule(false);
+
+            if (await _protectionUtilities.ConfuseAssembly(_targetModulePath) == false)
+            {
+                await _logger.Log("Could not confuse assembly", LogLevel.Error);
                 return await Task.FromResult(false);
             }
 #endif

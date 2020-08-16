@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 
 namespace StickFightTheGameTrainer.Obfuscation
 {
-    public class ProtectionUtilities : Confuser.Core.ILogger
+    public class AssemblyProtectionUtilities : Confuser.Core.ILogger
     {
         private readonly Common.ILogger _logger;
         private readonly LogLevel _errorLogLevel = LogLevel.Error;
         private bool _successfullyProtected;
 
-        public ProtectionUtilities(Common.ILogger logger)
+        public AssemblyProtectionUtilities(Common.ILogger logger)
         {
             _logger = logger;
         }
 
-        internal async Task<bool> ProtectAssembly(string targetPath)
+        internal async Task<bool> ConfuseAssembly(string targetPath)
         {
             if (string.IsNullOrWhiteSpace(targetPath))
             {
