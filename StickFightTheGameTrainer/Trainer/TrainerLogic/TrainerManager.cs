@@ -25,6 +25,7 @@ public class TrainerManager : MonoBehaviour
     private readonly IList<Weapon> _weaponComponents;
 
 #if DEBUG
+    private bool _unityLogsEnabled = true;
     private Vector2 _unityLogsScrollPosition = Vector2.zero;
     private readonly StringBuilder _unityLogs = new StringBuilder();
 #endif
@@ -1025,12 +1026,17 @@ public class TrainerManager : MonoBehaviour
 #if DEBUG
     private void DisplayUnityLogs(float x, float y, float width, float height)
     {
-        GUI.Box(new Rect(x, y, width, height), "");
-        if (GUI.Button(new Rect(x + width - 50f, y + height + 10f, 50f, 30f), "Clear"))
+        GUILayout.BeginArea(new Rect(x, y, width, height), new GUIStyle(GUI.skin.box));
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Clear", new GUIStyle(GUI.skin.button), new GUILayoutOption[]
+        {
+            GUILayout.Width(60),
+        }))
         {
             _unityLogs.Length = 0;
         }
-        GUILayout.BeginArea(new Rect(x, y, width, height));
+        _unityLogsEnabled = GUILayout.Toggle(_unityLogsEnabled, " Logs Enabled", GUILayout.Width(100));
+        GUILayout.EndHorizontal();
         _unityLogsScrollPosition = GUILayout.BeginScrollView(_unityLogsScrollPosition, new GUILayoutOption[]
         {
             GUILayout.Width(width),
@@ -1043,6 +1049,10 @@ public class TrainerManager : MonoBehaviour
 
     private void HandleUnityLogs(string logString, string stackTrace, LogType type)
     {
+        if (_unityLogsEnabled == false){
+            return;
+        }
+
         if (_unityLogs.Length > 20000)
         {
             _unityLogs.Remove(0, _unityLogs.Length);
