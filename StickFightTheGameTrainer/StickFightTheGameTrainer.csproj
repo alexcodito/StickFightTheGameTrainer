@@ -135,6 +135,7 @@
     <Compile Include="Trainer\Helpers\FlexibleInstructionComparer.cs" />
     <Compile Include="Trainer\Helpers\InjectionHelpers.cs" />
     <Compile Include="Trainer\Helpers\InstructionComparer.cs" />
+    <Compile Include="Trainer\PatcherMethods\AddBotChatMessages.cs" />
     <Compile Include="Trainer\PatcherMethods\AddTrainerManagerToGameManager.cs" />
     <Compile Include="Trainer\PatcherMethods\AddTrainerPatchIndicator.cs" />
     <Compile Include="Trainer\PatcherMethods\AddTrainerVersionConstant.cs" />

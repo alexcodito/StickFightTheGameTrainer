@@ -424,6 +424,14 @@ namespace StickFightTheGameTrainer.Trainer
             {
                 await _logger.Log($"Could not apply bot HasControl fix: {patchingStatus}", LogLevel.Warning);
             }
+            
+            await _logger.Log("Adding bot chat messages");
+            patchingStatus = await AddBotChatMessages.Execute(_targetModule);
+
+            if (patchingStatus > 0)
+            {
+                await _logger.Log($"Could not add bot chat messages: {patchingStatus}", LogLevel.Warning);
+            }
 
             SaveAndReloadTargetModule(false);
 
