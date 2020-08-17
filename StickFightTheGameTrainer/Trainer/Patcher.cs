@@ -64,6 +64,7 @@ namespace StickFightTheGameTrainer.Trainer
             new KeyValuePair<string, string>("GameManager", "AllButOnePlayersDied"),
             new KeyValuePair<string, string>("HoardHandler", "SpawnAI"),
             new KeyValuePair<string, string>("Controller", "Start"),
+            new KeyValuePair<string, string>("ChatManager", "SendChatMessage"),
             new KeyValuePair<string, string>("MultiplayerManager", "UnReadyAllPlayers"),
             new KeyValuePair<string, string>("MultiplayerManager", "SendMessageToAllClients"),
         };

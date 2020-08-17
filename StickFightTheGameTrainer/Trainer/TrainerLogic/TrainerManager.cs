@@ -495,7 +495,13 @@ public class TrainerManager : MonoBehaviour
                                     }
 
                                     // Announce selected weapon name
-                                    controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                    if (MatchmakingHandler.IsNetworkMatch){
+                                        controller.fighting.mNetworkPlayer.mChatManager.SendChatMessage(weaponName);
+                                    }
+                                    else
+                                    {
+                                        controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                    }
                                 }
                             }
                         }
@@ -537,7 +543,14 @@ public class TrainerManager : MonoBehaviour
                                     }
 
                                     // Announce selected weapon name
-                                    controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                    if (MatchmakingHandler.IsNetworkMatch)
+                                    {
+                                        controller.fighting.mNetworkPlayer.mChatManager.SendChatMessage(weaponName);
+                                    }
+                                    else
+                                    {
+                                        controller.fighting.mNetworkPlayer.mChatManager.Talk(weaponName);
+                                    }
                                 }
                             }
                         }
