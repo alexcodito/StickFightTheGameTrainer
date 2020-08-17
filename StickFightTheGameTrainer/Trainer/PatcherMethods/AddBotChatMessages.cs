@@ -164,7 +164,7 @@ namespace StickFightTheGameTrainer.Trainer.PatcherMethods
                 new Instruction(OpCodes.Ldfld, fightingFieldDef),
                 new Instruction(OpCodes.Ldfld, mNetworkPlayerFieldDef),
                 new Instruction(OpCodes.Ldfld, mChatManagerFieldDef),
-                new Instruction(OpCodes.Ldstr, "Ow!"),
+                new Instruction(OpCodes.Ldstr, "Existence is pain!"),
                 new Instruction(OpCodes.Callvirt, talkMethodDef),
                 new Instruction(OpCodes.Br_S, firstInstruction)
             };
