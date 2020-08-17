@@ -135,15 +135,15 @@ public class TrainerManager : MonoBehaviour
 
             GUILayout.BeginVertical();
 
-            // Toggle between 'Online (no-cheats)' and 'Online Friends (cheats)' mode
-            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.TrainerActive, "<color=green> " + (Singleton<TrainerOptions>.Instance.TrainerActive ? "Friends Mode" : "Online Mode") + "</color>", GUILayout.Width(140)) != Singleton<TrainerOptions>.Instance.TrainerActive)
+            // Toggle between 'Public (no-cheats)' and 'Modders-only (cheats)' mode
+            if (GUILayout.Toggle(Singleton<TrainerOptions>.Instance.TrainerActive, "<color=green> " + (Singleton<TrainerOptions>.Instance.TrainerActive ? "Modders Mode" : "Public Mode") + "</color>", GUILayout.Width(140)) != Singleton<TrainerOptions>.Instance.TrainerActive)
             {
                 // Announce restart due to online mode change
                 MultiplayerManager.mGameManager.winText.fontSize = 140f;
                 MultiplayerManager.mGameManager.winText.color = Color.white;
                 MultiplayerManager.mGameManager.winText.text = (!Singleton<TrainerOptions>.Instance.TrainerActive
-                    ? "ONLINE (FRIENDS ONLY) - CHEATS ENABLED\r\nRestarting in 2 seconds..."
-                    : "ONLINE (PUBLIC) - CHEATS DISABLED\r\nRestarting in 2 seconds...");
+                    ? "MODDERS ONLY - CHEATS ENABLED\r\nRestarting in 2 seconds..."
+                    : "PUBLIC - CHEATS DISABLED\r\nRestarting in 2 seconds...");
 
                 MultiplayerManager.mGameManager.winText.gameObject.SetActive(true);
 

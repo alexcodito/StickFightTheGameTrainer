@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace StickFightTheGameTrainer.Trainer.PatcherMethods
 {
     /// <summary>
-    /// Replace the game's version constant with a method that determines the appropriate version for Online and Local lobies to prevent online cheating.
+    /// Replace the game's version constant with a method that determines the appropriate version for Public and Modder/Local lobies to prevent online cheating.
     /// </summary>
     internal static class AddTrainerVersionConstant
     {
