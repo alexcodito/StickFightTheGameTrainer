@@ -10,7 +10,7 @@ public class AILogic : AI
     /*
 
     //
-    // Inheritted from AI base class.
+    // Inheritted from the game's AI base class.
     //
 
     public bool canAttack;
@@ -137,6 +137,18 @@ public class AILogic : AI
                         velocity = Mathf.Lerp(velocity, 1f, Time.deltaTime * (5f / velocitySmoothnes));
                     }
                 }
+
+                // (Work-in-progress)
+                // Jump if a wall is in the way of the move direction
+
+                //var cubeLayerBitMask = 1 << 23; // Cube bitmask
+                //RaycastHit cubeHit;
+                //var transformDirection = head.transform.TransformDirection(velocity * Vector3.forward);
+                //if (transformDirection != Vector3.up && transformDirection != Vector3.down && Physics.Linecast(head.position, transformDirection, out cubeHit, cubeLayerBitMask) == false)
+                //{
+                //  Gizmos.DrawLine(head.position, transformDirection, Color.red);
+                //  controller.Jump(false, false);
+                //}
 
                 controller.Move(velocity);
             }
