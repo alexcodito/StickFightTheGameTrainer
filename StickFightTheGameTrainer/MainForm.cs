@@ -102,6 +102,12 @@ namespace StickFightTheGameTrainer
 
         private async void BtnBrowseGamePath_Click(object sender, EventArgs e)
         {
+            if (progressBarInstallation.Visible)
+            {
+                MessageBox.Show("Installation is currently in progress.");
+                return;
+            }
+
             if (CheckValidPath(txtGamePath.Text)) {
                 var targetPath = GetAdjustedTargetFilePath(txtGamePath.Text);
                 browseGamePathDialog.SelectedPath = Path.GetDirectoryName(targetPath);
