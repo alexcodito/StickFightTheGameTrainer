@@ -3,26 +3,33 @@ using dnlib.DotNet.Emit;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace StickFightTheGameTrainer.Trainer.Helpers
 {
     public static class InjectionHelpers
     {
-        public static void Save(ModuleDefMD targetModule)
+        public static async Task<byte[]> Save(ModuleDefMD targetModule, bool writeToFile)
         {
             var targetLocation = targetModule.Location;
 
-            using(var ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 targetModule.Write(ms);
                 targetModule.Dispose();
 
                 ms.Seek(0, SeekOrigin.Begin);
-                using (var fs = new FileStream(targetLocation, FileMode.Create))
+                var data = ms.ToArray();
+                if (writeToFile)
                 {
-                    ms.CopyTo(fs);
-                    fs.Flush();
+                    using (var fs = new FileStream(targetLocation, FileMode.Create))
+                    {
+                        await fs.WriteAsync(data, 0, data.Length);
+                        fs.Flush();
+                    }
                 }
+
+                return data;
             }
         }
 
