@@ -102,13 +102,21 @@ namespace StickFightTheGameTrainer.Trainer
             return await Task.FromResult(true);
         }
 
-        private void SaveAndReloadTargetModule(bool reload = true)
+        private async Task SaveAndReloadTargetModule(bool reload = true, bool reloadInMemory = true, bool writeToFile = false)
         {
-            InjectionHelpers.Save(_targetModule);
+            var data = await InjectionHelpers.Save(_targetModule, writeToFile);
 
             if (reload)
             {
-                _targetModule = ModuleDefMD.Load(_targetModulePath);
+                if (reloadInMemory == false)
+                { 
+                    _targetModule = ModuleDefMD.Load(_targetModulePath);
+                }
+                else if (reloadInMemory)
+                {                    
+                    _targetModule = ModuleDefMD.Load(data);
+                    _targetModule.Location = _targetModulePath;
+                }
             }
         }
 
@@ -273,7 +281,7 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule();
 
             // Set target fields and methods as public in order to allow TrainerLogic.dll's code to reference them and compile.
             // Note: While it would have been convenient to simply set *every* field and method as public/internal, it causes in-game glitches (e.g. ambiguous references and null reference exceptions)
@@ -292,7 +300,7 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule(true, true, true);
 
             // Compile and load TrainerLogic module
             await _logger.Log("Compiling Trainer Logic module");
@@ -303,7 +311,7 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule();
 
             // Keeping the fields as public causes exceptions due to reference ambiguity, so they need to be made internal following successful compilation.
             await _logger.Log("Setting fields as internal");
@@ -312,7 +320,7 @@ namespace StickFightTheGameTrainer.Trainer
             await _logger.Log("Setting methods as internal");
             _targetMethods.ForEach(targetMethod => InjectionHelpers.SetMethodAccessModifier(_targetModule, targetMethod.Key, targetMethod.Value, MethodAttributes.Assembly));
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule();
 
             // Inject TrainerOptions class
             await _logger.Log("Injecting trainer logic modules");
@@ -331,7 +339,7 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule();
 
             // Inject declaration of TrainerManager class into GameManager class and inject its instantiation code into GameManager's Start() method
             await _logger.Log("Adding TrainerManager to GameManager");
@@ -343,7 +351,7 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule();
 
             await _logger.Log("Add trainer game version constant");
             patchingStatus = await AddTrainerVersionConstant.Execute(_targetModule);
@@ -425,7 +433,7 @@ namespace StickFightTheGameTrainer.Trainer
             {
                 await _logger.Log($"Could not apply bot HasControl fix: {patchingStatus}", LogLevel.Warning);
             }
-            
+
             await _logger.Log("Adding bot chat messages");
             patchingStatus = await AddBotChatMessages.Execute(_targetModule);
 
@@ -434,9 +442,9 @@ namespace StickFightTheGameTrainer.Trainer
                 await _logger.Log($"Could not add bot chat messages: {patchingStatus}", LogLevel.Warning);
             }
 
-            SaveAndReloadTargetModule();
+            await SaveAndReloadTargetModule();
 
-#if !DEBUG
+#if DEBUG
             await _logger.Log("Protecting assembly");
 
             patchingStatus = await TrainerProtectionUtilities.ObfuscateTrainer(_targetModule);
@@ -447,9 +455,9 @@ namespace StickFightTheGameTrainer.Trainer
                 return await Task.FromResult(false);
             }
 
-            SaveAndReloadTargetModule(false);
+            await SaveAndReloadTargetModule();
 
-            if (await _protectionUtilities.ConfuseAssembly(_targetModulePath) == false)
+            if (await _protectionUtilities.ConfuseAssembly(_targetModulePath, _targetModule) == false)
             {
                 await _logger.Log("Could not confuse assembly", LogLevel.Error);
                 return await Task.FromResult(false);
