@@ -18,7 +18,7 @@ Injecting IL code directly into the game's Assembly-CSharp.dll file allows this 
 - Browse and select weapons (extra weapons)
 - Spawn different AI Bots / Single Player mode
 
-Now supports playing online (cheats off), and with friends (cheats on).
+Now supports playing online in Public Mode (cheats off), and with Modders-only Mode (cheats on).
 
 ### Project Building
 
@@ -77,11 +77,15 @@ Please note that when installing the patch in `Release` mode, the target assembl
 
 ### Release Information
 
-##### Version 1.0.0.3 (Game version v1.2.06 and above)
+##### Version 1.0.0.3 (Game version v1.2.05 and above)
 - Improved AI logic.
-- Hold weapon selection shortcuts to browse quickly.
+- Added easter eggs.
+- Hold weapon selection shortcuts to browse faster.
+- Play online with friends who don't have the trainer installed.
+- Improved anti-cheating protection for public lobbies.
+- Some features are now optional if they happen to regress due to updates to the game.
 
-##### Version 1.0.0.2 (Game version v1.2.06 and above)
+##### Version 1.0.0.2 (Game version v1.2.05 and above)
 - Added AI Bots / Single Player mode.
 - Improved shortcuts.
 - Spawn weapons as presents.
