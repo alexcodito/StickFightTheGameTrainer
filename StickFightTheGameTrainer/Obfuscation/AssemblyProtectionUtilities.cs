@@ -1,8 +1,10 @@
 ﻿using Confuser.Core;
 using Confuser.Core.Project;
+using dnlib.DotNet;
 using StickFightTheGameTrainer.Common;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -19,18 +21,23 @@ namespace StickFightTheGameTrainer.Obfuscation
             _logger = logger;
         }
 
-        internal async Task<bool> ConfuseAssembly(string targetPath)
+        internal async Task<bool> ConfuseAssembly(string targetPath, ModuleDefMD targetModule)
         {
             if (string.IsNullOrWhiteSpace(targetPath))
             {
-                throw new ArgumentNullException(targetPath);
+                throw new ArgumentNullException(nameof(targetPath));
+            }
+
+            if(targetModule == null)
+            {
+                throw new ArgumentNullException(nameof(targetModule));
             }
 
             var targetFile = Path.GetFileName(targetPath);
             var targetDirectory = Path.GetDirectoryName(targetPath);
 
             var project = new ConfuserProject
-            {
+            {                
                 BaseDirectory = targetDirectory,
                 OutputDirectory = targetDirectory
             };
@@ -38,12 +45,27 @@ namespace StickFightTheGameTrainer.Obfuscation
             // Confuser plugins are merged into the main assembly at build time. Instruct the project to load them from the running executable.
             project.PluginPaths.Add(Assembly.GetExecutingAssembly().Location);
 
-            ProjectModule module = new ProjectModule
+            byte[] rawData;
+            using (var ms = new MemoryStream())
             {
-                Path = targetFile
+                targetModule.Write(ms);
+                targetModule.Dispose();
+                ms.Seek(0, SeekOrigin.Begin);
+                rawData = ms.ToArray();
+            }
+
+            if (rawData == null || rawData.Count() == 0)
+            {
+                return false;
+            }
+
+            ProjectModule projectModule = new ProjectModule
+            {                 
+                Path = targetFile,
+                RawData = rawData
             };
 
-            module.Rules.Add(new Rule
+            projectModule.Rules.Add(new Rule
             {
                 new SettingItem<Protection>("watermark", SettingItemAction.Remove),
                 new SettingItem<Protection>("anti debug"),
@@ -53,11 +75,11 @@ namespace StickFightTheGameTrainer.Obfuscation
                 new SettingItem<Protection>("harden"),
             });
 
-            project.Add(module);
+            project.Add(projectModule);
 
             var parameters = new ConfuserParameters
             {
-                Project = project,
+                Project = project,        
                 Logger = this
             };
 
