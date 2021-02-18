@@ -1,9 +1,27 @@
-# Stick Fight: The Game Trainer
-A trainer / mod for Stick Fight: The Game that supports both local and online multiplayer modes (via steam).
+<div align="center">
+    <img src="https://cdn2.steamgriddb.com/file/sgdb-cdn/logo_thumb/a667f4e7b0c8a3babe331569d3eac6bd.png" width="256" alt="Logo"> 
+    <br>
+    <h3>Stick Fight: The Game [+12 Trainer]</h1>
+    A <b>trainer/mod</b> for Stick Fight: The Game that adds new online and local features.
+</div>
+
+
+<div align="center">    
+    <br> 
+    <img src="https://button.moddb.com/popularity/medium/mods/35572.png">
+    <img src="https://button.moddb.com/rating/medium/mods/35572.png">
+    <br> 
+    <br> 
+<img src="https://media.moddb.com/images/mods/1/36/35572/Bot_Mayhem_2.png" alt="Bot Mayhem">
+</div>
+
+<br>
+
+## Overview
 
 Injecting IL code directly into the game's Assembly-CSharp.dll file allows this trainer to work accross all versions, including future updates. The intention is to have a maintenance-free trainer that does not need to reflect changes that are made to every update of the game. 
 
-### Features (+12)
+#### Features
 
 - No recoil
 - Full auto
@@ -16,11 +34,11 @@ Injecting IL code directly into the game's Assembly-CSharp.dll file allows this 
 - Unlimited ammunition
 - Spawn weapon on demand (extra weapons)
 - Browse and select weapons (extra weapons)
-- Spawn different AI Bots / Single Player mode
+- Spawn different types of AI Bots (new Single Player mode)
 
 Now supports playing online in Public Mode (cheats off), and with Modders-only Mode (cheats on).
 
-### Project Building
+## Project Building
 
 The `Build Action` property is set to `None` for the following source code files.
 
@@ -45,7 +63,9 @@ it prevents script-kiddies from enabling cheats in online public lobbies.
 
 Please note that when installing the patch in `Release` mode, the target assembly is additionally obfuscated with the use of ConfuserEx.
 
-### Installation
+## Installation
+
+<a href="https://www.moddb.com/mods/stick-fight-online-trainer-loxa/videos/how-to-install-and-uninstall-stick-fight-the-game-trainer-by-loxa">How to install and uninstall - Watch on Mod DB</a>
 
 1) Unzip / extract the downloaded .zip file.
 2) Run the extracted trainer .exe program.
@@ -53,7 +73,7 @@ Please note that when installing the patch in `Release` mode, the target assembl
 - Most common Steam location: `C:\Program Files (x86)\Steam\steamapps\common\StickFightTheGame\StickFight_Data\Managed`
 4) Press `Install Mod` button.
 
-### Controls
+## Controls
 ##### PC Keyboard
 
     - Toggle Trainer Menu: [SHIFT] + [M]
@@ -68,14 +88,26 @@ Please note that when installing the patch in `Release` mode, the target assembl
     - Spawn Random Weapon: [DPadUp] or [DPadDown]
     - Browse Weapons: [DPadLeft] or [DPadRight]
 
-### Notes
+## Notes
 
     - The scoreboard displays wins (i.e. how many rounds you wear the crown for).
     - When you skip a level, no one wins the round.
     - This mod will only activate if you're playing locally or with other players that have it installed.
     - HP bars always display 100, even if your health is set to 300. Damage is scaled relatively.
 
-### Release Information
+## Media
+
+#### Videos
+<a href="https://www.moddb.com/mods/stick-fight-online-trainer-loxa/videos/1v3-bots-stick-fight-the-game-trainer-by-loxa">1v3 Bots - Stick Fight The Game Trainer by loxa - Mod DB</a>
+<br>
+<a href="https://www.moddb.com/mods/stick-fight-online-trainer-loxa/videos/4x-bots-max-stats-stick-fight-the-game-trainer-by-loxa">4x Bots Max Stats - Stick Fight The Game Trainer by loxa - Mod DB</a>
+
+#### Screenshots
+<img src="https://media.moddb.com/cache/images/mods/1/36/35572/thumb_620x2000/Trainer_Menu.png" alt="Bot Mayhem">
+<img src="https://media.moddb.com/images/mods/1/36/35572/Bot_Mayhem.png" alt="Bot Mayhem">
+<br>
+
+## Release Information
 
 ##### Version 1.0.0.3 (Game version v1.2.05 and above)
 - Improved AI logic.
