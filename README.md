@@ -8,8 +8,7 @@
 
 <div align="center">    
     <br> 
-    <img src="https://button.moddb.com/popularity/medium/mods/35572.png">
-    <img src="https://button.moddb.com/rating/medium/mods/35572.png">
+    <a href="https://www.moddb.com/mods/stick-fight-online-trainer-loxa" title="View Stick Fight +12 Online Trainer [loxa] on Mod DB" target="_blank"><img src="https://button.moddb.com/popularity/medium/mods/35572.png" alt="Stick Fight +12 Online Trainer [loxa]" /></a>    <a href="https://www.moddb.com/mods/stick-fight-online-trainer-loxa/downloads/stick-fight-online-trainer-loxa" title="Download Stick Fight +12 Online Trainer (v1.0.0.2) [loxa] - Mod DB" target="_blank"><img src="https://button.moddb.com/download/medium/132847.png" alt="Stick Fight +12 Online Trainer (v1.0.0.2) [loxa]" /></a>
     <br> 
     <br> 
 <img src="https://media.moddb.com/images/mods/1/36/35572/Bot_Mayhem_2.png" alt="Bot Mayhem">
