@@ -62,6 +62,13 @@ it prevents script-kiddies from enabling cheats in online public lobbies.
 
 Please note that when installing the patch in `Release` mode, the target assembly is additionally obfuscated with the use of ConfuserEx.
 
+This repository uses a forked version of [ConfuserEx](https://github.com/alexcodito/ConfuserEx/tree/master) that includes support for loading binaries from raw bytes instead of file paths.
+
+The /lib directory contains the required DLLs for both ConfuserEx and dnSpy. These are necessary to successfully build the solution.  
+
+## FAQ
+[Why make it open source if you're just going to encrypt the code?](https://github.com/alexcodito/StickFightTheGameTrainer/issues/2)
+
 ## Installation
 
 <a href="https://www.moddb.com/mods/stick-fight-online-trainer-loxa/videos/how-to-install-and-uninstall-stick-fight-the-game-trainer-by-loxa">How to install and uninstall - Watch on Mod DB</a>
